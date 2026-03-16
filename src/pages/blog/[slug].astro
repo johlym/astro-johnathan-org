@@ -1,7 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro'
-import { getPost } from '../../lib/payload'
+import { getPost, getAllPostSlugs } from '../../lib/payload'
 import { lexicalToHtml, extractHeadings } from '../../lib/richtext'
+
+export async function getStaticPaths() {
+  const { docs } = await getAllPostSlugs()
+  return docs.map((post) => ({ params: { slug: post.slug } }))
+}
 
 const { slug } = Astro.params
 

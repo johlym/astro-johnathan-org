@@ -3,7 +3,7 @@ import node from '@astrojs/node'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  output: 'server',
+  output: 'hybrid',
   adapter: node({
     mode: 'standalone',
   }),
