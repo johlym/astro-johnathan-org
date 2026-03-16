@@ -1,111 +1,134 @@
 ---
 import Layout from '../../layouts/Layout.astro'
-import { getPost, getAllPostSlugs } from '../../lib/payload'
+import { getPost } from '../../lib/payload'
 import { lexicalToHtml, extractHeadings } from '../../lib/richtext'
-
-export async function getStaticPaths() {
-  const { docs } = await getAllPostSlugs()
-  return docs.map((post) => ({ params: { slug: post.slug } }))
-}
+import { render } from 'astro:content'
+import { getMdPosts } from '../../lib/mdposts'
 
 const { slug } = Astro.params
-
 if (!slug) return Astro.redirect('/blog')
 
-let post
-try {
-  const result = await getPost(slug)
-  post = result.docs[0] ?? null
-} catch {
-  post = null
+// ── 1. Check legacy Markdown collection ──────────────────────────────────────
+const mdPosts = await getMdPosts()
+const mdEntry = mdPosts.find((e) => e.slug === slug) ?? null
+
+type TocItem = { id: string; text: string; depth?: number; tag?: string }
+
+let title = ''
+let dateObj: Date | null = null
+let excerpt: string | undefined
+let category: string | undefined
+let tocItems: TocItem[] = []
+let showToc = false
+// MD-only
+let MdContent: ((_props: Record<string, unknown>) => unknown) | null = null
+// CMS-only
+let bodyHtml = ''
+let authorName: string | null = null
+let categoryTitle: string | null = null
+let featuredImageUrl: string | null = null
+let featuredImageAlt = ''
+
+if (mdEntry) {
+  const { Content, headings } = await render(mdEntry)
+  title = mdEntry.data.title
+  dateObj = mdEntry.data.date
+  excerpt = mdEntry.data.excerpt ?? mdEntry.data.description
+  category = mdEntry.data.category
+  MdContent = Content as ((_props: Record<string, unknown>) => unknown)
+  tocItems = headings
+    .filter((h) => h.depth <= 3)
+    .map((h) => ({ id: h.slug, text: h.text, depth: h.depth }))
+  showToc = tocItems.length > 0
+} else {
+  // ── 2. Fall back to Payload REST API ───────────────────────────────────────
+  let post = null
+  try {
+    const result = await getPost(slug)
+    post = result.docs[0] ?? null
+  } catch {
+    // not found
+  }
+  if (!post) return Astro.redirect('/404')
+
+  title = post.title
+  dateObj = new Date(post.createdAt)
+  excerpt = post.excerpt
+  bodyHtml = lexicalToHtml(post.body)
+  const rawHeadings = post.showTableOfContents ? extractHeadings(post.body) : []
+  tocItems = rawHeadings.map((h) => ({ id: h.id, text: h.text, tag: h.tag }))
+  showToc = tocItems.length > 0
+  authorName =
+    post.author && typeof post.author === 'object' && 'name' in post.author
+      ? (post.author as { name: string }).name
+      : null
+  categoryTitle =
+    post.category && typeof post.category === 'object' && 'title' in post.category
+      ? (post.category as { title: string }).title
+      : null
+  featuredImageUrl =
+    post.featuredImage && typeof post.featuredImage === 'object' && 'url' in post.featuredImage
+      ? (post.featuredImage as { url: string }).url
+      : null
+  featuredImageAlt =
+    post.featuredImage && typeof post.featuredImage === 'object' && 'alt' in post.featuredImage
+      ? String((post.featuredImage as { alt?: string }).alt ?? '')
+      : ''
 }
 
-if (!post) return Astro.redirect('/404')
-
-const bodyHtml = lexicalToHtml(post.body)
-const headings = post.showTableOfContents ? extractHeadings(post.body) : []
-const showToc = headings.length > 0
-
-const authorName =
-  post.author && typeof post.author === 'object' && 'name' in post.author
-    ? post.author.name
-    : null
-
-const categoryTitle =
-  post.category && typeof post.category === 'object' && 'title' in post.category
-    ? post.category.title
-    : null
-
-const featuredImageUrl =
-  post.featuredImage && typeof post.featuredImage === 'object' && 'url' in post.featuredImage
-    ? post.featuredImage.url
-    : null
-
-const featuredImageAlt =
-  post.featuredImage && typeof post.featuredImage === 'object' && 'alt' in post.featuredImage
-    ? (post.featuredImage.alt as string)
-    : ''
+const dateStr = dateObj
+  ? dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  : ''
+const dateIso = dateObj?.toISOString() ?? ''
+const metaCategory = category ?? categoryTitle
 ---
 
-<Layout title={post.title} description={post.excerpt}>
+<Layout title={title} description={excerpt}>
   <article>
     <header class="mb-8">
-      <h1 class="text-3xl md:text-4xl font-bold mb-3">{post.title}</h1>
-      <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-        <time datetime={post.createdAt}>
-          {new Date(post.createdAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </time>
-        {authorName && (
-          <>
-            <span>&middot;</span>
-            <span>{authorName}</span>
-          </>
-        )}
-        {categoryTitle && (
-          <>
-            <span>&middot;</span>
-            <span>{categoryTitle}</span>
-          </>
-        )}
+      <h1 class="text-3xl md:text-4xl font-bold mb-3">{title}</h1>
+      <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+        {dateObj && <time datetime={dateIso}>{dateStr}</time>}
+        {authorName && <><span>&middot;</span><span>{authorName}</span></>}
+        {metaCategory && <><span>&middot;</span><span>{metaCategory}</span></>}
       </div>
-      {post.excerpt && (
-        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 italic">{post.excerpt}</p>
+      {excerpt && (
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 italic">{excerpt}</p>
       )}
     </header>
 
     {showToc && (
       <nav class="mb-8 p-4 rounded-lg bg-gray-100 dark:bg-gray-800" aria-label="Table of Contents">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-3">
+        <p class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-3">
           Contents
-        </h2>
+        </p>
         <ul class="space-y-1.5 text-sm">
-          {headings.map((heading) => (
-            <li class={heading.tag === 'h3' ? 'ml-4' : heading.tag === 'h4' ? 'ml-8' : ''}>
-              <a href={`#${heading.id}`} class="text-accent dark:text-accent-light">
-                {heading.text}
-              </a>
-            </li>
-          ))}
+          {tocItems.map((item) => {
+            const indent =
+              (item.depth === 3 || item.tag === 'h3') ? 'ml-4' :
+              (item.depth === 4 || item.tag === 'h4') ? 'ml-8' : ''
+            return (
+              <li class={indent}>
+                <a href={`#${item.id}`} class="text-accent dark:text-accent-light">
+                  {item.text}
+                </a>
+              </li>
+            )
+          })}
         </ul>
       </nav>
     )}
 
     {featuredImageUrl && (
       <figure class="mb-8">
-        <img
-          src={featuredImageUrl}
-          alt={featuredImageAlt}
-          class="w-full rounded-lg"
-          loading="eager"
-        />
+        <img src={featuredImageUrl} alt={featuredImageAlt} class="w-full rounded-lg" loading="eager" />
       </figure>
     )}
 
-    <div class="rich-text" set:html={bodyHtml} />
+    {MdContent
+      ? <div class="rich-text prose dark:prose-invert max-w-none"><MdContent /></div>
+      : <div class="rich-text" set:html={bodyHtml} />
+    }
 
     <footer class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
       <a href="/blog" class="text-accent dark:text-accent-light font-medium">

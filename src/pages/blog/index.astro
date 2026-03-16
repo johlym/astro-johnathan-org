@@ -3,14 +3,85 @@ export const prerender = false
 
 import Layout from '../../layouts/Layout.astro'
 import { getPosts } from '../../lib/payload'
+import { getMdPosts } from '../../lib/mdposts'
 
 const pageParam = Astro.url.searchParams.get('page')
 const page = Math.max(1, parseInt(pageParam || '1', 10) || 1)
+const limit = 10
 
-const { docs: posts, totalPages } = await getPosts(page, 10)
+// ── CMS posts (always fetch to get totalDocs, even if page > cmsPages) ───────
+const cmsResult = await getPosts(page, limit)
+const cmsTotalDocs = cmsResult.totalDocs
+const cmsTotalPages = Math.ceil(cmsTotalDocs / limit)
+// How many CMS posts appear on the last CMS page
+const cmsLastPageCount = cmsTotalDocs > 0 ? (cmsTotalDocs % limit || limit) : 0
+// How many MD posts fill the remainder of that last CMS page
+const mdFillCount = cmsLastPageCount > 0 && cmsLastPageCount < limit
+  ? limit - cmsLastPageCount
+  : 0
+
+// ── Legacy MD posts (compiled at build time — no network) ────────────────────
+const allMdPosts = await getMdPosts()
+const mdTotal = allMdPosts.length
+
+// ── Combined total pages ──────────────────────────────────────────────────────
+const remainingMd = Math.max(0, mdTotal - mdFillCount)
+const totalPagesAll = cmsTotalPages + Math.ceil(remainingMd / limit)
+
+// ── Build the list of posts for the current page ──────────────────────────────
+type UnifiedPost = {
+  slug: string
+  title: string
+  date: Date
+  excerpt?: string
+  category?: string
+  source: 'cms' | 'md'
+}
+
+let pagePosts: UnifiedPost[] = []
+
+if (page <= cmsTotalPages) {
+  // CMS territory (last CMS page may have MD fill)
+  const cmsEntries: UnifiedPost[] = cmsResult.docs.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    date: new Date(p.createdAt),
+    excerpt: p.excerpt,
+    category:
+      p.category && typeof p.category === 'object' && 'title' in p.category
+        ? (p.category as { title: string }).title
+        : undefined,
+    source: 'cms',
+  }))
+
+  if (page === cmsTotalPages && mdFillCount > 0) {
+    const mdFill: UnifiedPost[] = allMdPosts.slice(0, mdFillCount).map((e) => ({
+      slug: e.slug,
+      title: e.data.title,
+      date: e.data.date,
+      excerpt: e.data.excerpt ?? e.data.description,
+      category: e.data.category,
+      source: 'md',
+    }))
+    pagePosts = [...cmsEntries, ...mdFill]
+  } else {
+    pagePosts = cmsEntries
+  }
+} else {
+  // Pure MD territory
+  const mdStart = mdFillCount + (page - cmsTotalPages - 1) * limit
+  pagePosts = allMdPosts.slice(mdStart, mdStart + limit).map((e) => ({
+    slug: e.slug,
+    title: e.data.title,
+    date: e.data.date,
+    excerpt: e.data.excerpt ?? e.data.description,
+    category: e.data.category,
+    source: 'md',
+  }))
+}
 
 const hasPrev = page > 1
-const hasNext = page < totalPages
+const hasNext = page < totalPagesAll
 ---
 
 <Layout title="Blog">
@@ -18,10 +89,10 @@ const hasNext = page < totalPages
     <h1 class="text-3xl font-bold">Blog</h1>
   </section>
 
-  {posts.length > 0 ? (
+  {pagePosts.length > 0 ? (
     <>
       <div class="space-y-8">
-        {posts.map((post) => (
+        {pagePosts.map((post) => (
           <article class="group pb-8 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
             <a href={`/blog/${post.slug}`} class="no-underline block">
               <h2 class="text-xl font-semibold text-black dark:text-white group-hover:text-accent dark:group-hover:text-accent-light transition-colors">
@@ -29,17 +100,17 @@ const hasNext = page < totalPages
               </h2>
             </a>
             <div class="flex items-center gap-3 mt-2 text-sm text-gray-600 dark:text-gray-300">
-              <time datetime={post.createdAt}>
-                {new Date(post.createdAt).toLocaleDateString('en-US', {
+              <time datetime={post.date.toISOString()}>
+                {post.date.toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
               </time>
-              {post.category && typeof post.category === 'object' && 'title' in post.category && (
+              {post.category && (
                 <>
                   <span>&middot;</span>
-                  <span>{post.category.title}</span>
+                  <span>{post.category}</span>
                 </>
               )}
             </div>
@@ -50,7 +121,7 @@ const hasNext = page < totalPages
         ))}
       </div>
 
-      {totalPages > 1 && (
+      {totalPagesAll > 1 && (
         <nav class="mt-10 flex items-center justify-between" aria-label="Pagination">
           {hasPrev ? (
             <a href={`/blog?page=${page - 1}`} class="text-accent dark:text-accent-light font-medium">
@@ -60,7 +131,7 @@ const hasNext = page < totalPages
             <span />
           )}
           <span class="text-sm text-gray-600 dark:text-gray-300">
-            Page {page} of {totalPages}
+            Page {page} of {totalPagesAll}
           </span>
           {hasNext ? (
             <a href={`/blog?page=${page + 1}`} class="text-accent dark:text-accent-light font-medium">
