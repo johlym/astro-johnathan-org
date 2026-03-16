@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getPosts, getSiteSettings } from '../lib/payload'
+
+let siteTitle = 'My Site'
+let siteDescription = ''
+try {
+  const settings = await getSiteSettings()
+  siteTitle = settings.siteTitle || 'My Site'
+  siteDescription = settings.siteDescription || ''
+} catch {
+  // fallback
+}
+
+const { docs: posts } = await getPosts(1, 5)
+---
+
+<Layout title={siteTitle} description={siteDescription}>
+  {posts.length > 0 && (
+    <section>
+      <h2 class="text-2xl font-semibold mb-6">Recent Posts</h2>
+      <div class="space-y-8">
+        {posts.map((post) => (
+          <article class="group">
+            <a href={`/blog/${post.slug}`} class="no-underline block">
+              <h3 class="text-xl font-semibold text-black dark:text-white group-hover:text-accent dark:group-hover:text-accent-light transition-colors">
+                {post.title}
+              </h3>
+            </a>
+            <time
+              class="text-sm text-gray-600 dark:text-gray-300 mt-1 block"
+              datetime={post.createdAt}
+            >
+              {new Date(post.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+            {post.excerpt && (
+              <p class="mt-2 text-gray-600 dark:text-gray-300">{post.excerpt}</p>
+            )}
+          </article>
+        ))}
+      </div>
+      <div class="mt-8">
+        <a href="/blog" class="text-accent dark:text-accent-light font-medium">
+          View all posts &rarr;
+        </a>
+      </div>
+    </section>
+  )}
+</Layout>

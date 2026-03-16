@@ -1,0 +1,73 @@
+---
+import '../styles/globals.css'
+import Header from '../components/Header.astro'
+import Footer from '../components/Footer.astro'
+import { getSiteSettings, getNavigation } from '../lib/payload'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const { title, description } = Astro.props
+
+let siteTitle = 'My Site'
+let siteDescription = ''
+let navLinks: { href: string; label: string }[] = []
+
+try {
+  const settings = await getSiteSettings()
+  siteTitle = settings.siteTitle || 'My Site'
+  siteDescription = settings.siteDescription || ''
+} catch {
+  // fallback
+}
+
+try {
+  const nav = await getNavigation()
+  navLinks = (nav.links || [])
+    .map((link) => {
+      const page = typeof link.page === 'object' ? link.page : null
+      return {
+        href: page?.slug ? `/${page.slug}` : '/',
+        label: link.label || page?.title || '',
+      }
+    })
+    .filter((l) => l.label)
+} catch {
+  // fallback
+}
+
+const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle
+const pageDescription = description || siteDescription
+---
+
+<html lang="en" suppressHydrationWarning>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {pageDescription && <meta name="description" content={pageDescription} />}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      ;(function () {
+        var s = localStorage.getItem('theme')
+        if (s === 'dark' || (!s && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <Header siteTitle={siteTitle} navLinks={navLinks} />
+    <main class="flex-1 w-full max-w-2xl mx-auto px-4 py-8">
+      <slot />
+    </main>
+    <Footer siteTitle={siteTitle} />
+  </body>
+</html>

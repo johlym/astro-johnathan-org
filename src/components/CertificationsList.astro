@@ -1,0 +1,56 @@
+---
+import { getCertifications } from '../lib/payload'
+
+interface Props {
+  block: {
+    showAll?: boolean
+    selectedCertifications?: (number | { id: number })[]
+  }
+}
+
+const { block } = Astro.props
+
+const formatDate = (iso: string) => {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+}
+
+let certifications: Awaited<ReturnType<typeof getCertifications>>['docs'] = []
+
+try {
+  if (block.showAll) {
+    const result = await getCertifications()
+    certifications = result.docs
+  } else {
+    const ids = (block.selectedCertifications || []).map((e) =>
+      typeof e === 'object' ? e.id : e,
+    )
+    if (ids.length) {
+      const result = await getCertifications(ids)
+      const idOrder = new Map(ids.map((id, i) => [id, i]))
+      certifications = result.docs.sort(
+        (a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0),
+      )
+    }
+  }
+} catch {
+  // fallback to empty
+}
+---
+
+{certifications.length > 0 && (
+  <div class="space-y-4 my-8">
+    <h2>Certifications</h2>
+    {certifications.map((cert) => (
+      <div class="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+        <div class="font-semibold">{cert.name}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-300">{cert.issuingBody}</div>
+        {cert.issued && (
+          <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {formatDate(cert.issued)}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+)}

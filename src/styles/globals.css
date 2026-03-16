@@ -1,0 +1,114 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-white: #f0f0f0;
+  --color-black: #222222;
+  --color-accent: rgb(92, 118, 160);
+  --color-accent-light: rgb(122, 148, 190);
+  --color-accent-dark: rgb(62, 88, 130);
+  --color-gray-100: #e5e5e5;
+  --color-gray-200: #d4d4d4;
+  --color-gray-300: #a3a3a3;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #333333;
+  --color-gray-900: #292929;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    @apply bg-white text-black antialiased;
+  }
+
+  html.dark {
+    @apply bg-black text-white;
+  }
+
+  body {
+    @apply font-sans leading-relaxed;
+  }
+
+  a {
+    @apply text-accent underline decoration-accent/30 underline-offset-2 transition-colors hover:text-accent-light hover:decoration-accent/60;
+  }
+
+  .dark a {
+    @apply text-accent-light hover:text-accent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 { @apply text-3xl md:text-4xl; }
+  h2 { @apply text-2xl md:text-3xl; }
+  h3 { @apply text-xl md:text-2xl; }
+  h4 { @apply text-lg md:text-xl; }
+
+  hr {
+    @apply my-8 border-gray-200;
+  }
+
+  .dark hr {
+    @apply border-gray-700;
+  }
+
+  pre {
+    @apply overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-white;
+  }
+
+  .dark pre {
+    @apply bg-gray-800;
+  }
+
+  code:not(pre code) {
+    @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono;
+  }
+
+  .dark code:not(pre code) {
+    @apply bg-gray-800;
+  }
+
+  blockquote {
+    @apply border-l-4 border-accent pl-4 italic text-gray-600;
+  }
+
+  .dark blockquote {
+    @apply text-gray-300;
+  }
+}
+
+/* Rich text content styles */
+.rich-text p {
+  @apply mb-4;
+}
+
+.rich-text h1,
+.rich-text h2,
+.rich-text h3,
+.rich-text h4 {
+  @apply mt-8 mb-4;
+}
+
+.rich-text ul {
+  @apply mb-4 list-disc pl-6;
+}
+
+.rich-text ol {
+  @apply mb-4 list-decimal pl-6;
+}
+
+.rich-text li {
+  @apply mb-1;
+}
+
+.rich-text img {
+  @apply my-6 rounded-lg;
+}
+
+.rich-text pre {
+  @apply my-6;
+}

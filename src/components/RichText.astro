@@ -1,0 +1,32 @@
+---
+import { splitIntoSegments, renderHtmlSegment } from '../lib/richtext'
+import type { LexicalNode } from '../lib/richtext'
+import WorkExperienceList from './WorkExperienceList.astro'
+import CertificationsList from './CertificationsList.astro'
+
+interface Props {
+  content: { root: LexicalNode } | null | undefined
+  class?: string
+}
+
+const { content, class: className } = Astro.props
+
+const segments = content?.root?.children ? splitIntoSegments(content.root.children) : []
+---
+
+{segments.length > 0 && (
+  <div class={className}>
+    {segments.map((segment) => {
+      if (segment.kind === 'html') {
+        return <div set:html={renderHtmlSegment(segment.nodes)} />
+      }
+      if (segment.blockType === 'workExperienceList') {
+        return <WorkExperienceList block={segment.fields as any} />
+      }
+      if (segment.blockType === 'certificationsList') {
+        return <CertificationsList block={segment.fields as any} />
+      }
+      return null
+    })}
+  </div>
+)}

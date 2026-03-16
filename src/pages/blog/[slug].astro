@@ -1,0 +1,111 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { getPost } from '../../lib/payload'
+import { lexicalToHtml, extractHeadings } from '../../lib/richtext'
+
+const { slug } = Astro.params
+
+if (!slug) return Astro.redirect('/blog')
+
+let post
+try {
+  const result = await getPost(slug)
+  post = result.docs[0] ?? null
+} catch {
+  post = null
+}
+
+if (!post) return Astro.redirect('/404')
+
+const bodyHtml = lexicalToHtml(post.body)
+const headings = post.showTableOfContents ? extractHeadings(post.body) : []
+const showToc = headings.length > 0
+
+const authorName =
+  post.author && typeof post.author === 'object' && 'name' in post.author
+    ? post.author.name
+    : null
+
+const categoryTitle =
+  post.category && typeof post.category === 'object' && 'title' in post.category
+    ? post.category.title
+    : null
+
+const featuredImageUrl =
+  post.featuredImage && typeof post.featuredImage === 'object' && 'url' in post.featuredImage
+    ? post.featuredImage.url
+    : null
+
+const featuredImageAlt =
+  post.featuredImage && typeof post.featuredImage === 'object' && 'alt' in post.featuredImage
+    ? (post.featuredImage.alt as string)
+    : ''
+---
+
+<Layout title={post.title} description={post.excerpt}>
+  <article>
+    <header class="mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold mb-3">{post.title}</h1>
+      <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+        <time datetime={post.createdAt}>
+          {new Date(post.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+        {authorName && (
+          <>
+            <span>&middot;</span>
+            <span>{authorName}</span>
+          </>
+        )}
+        {categoryTitle && (
+          <>
+            <span>&middot;</span>
+            <span>{categoryTitle}</span>
+          </>
+        )}
+      </div>
+      {post.excerpt && (
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 italic">{post.excerpt}</p>
+      )}
+    </header>
+
+    {showToc && (
+      <nav class="mb-8 p-4 rounded-lg bg-gray-100 dark:bg-gray-800" aria-label="Table of Contents">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-3">
+          Contents
+        </h2>
+        <ul class="space-y-1.5 text-sm">
+          {headings.map((heading) => (
+            <li class={heading.tag === 'h3' ? 'ml-4' : heading.tag === 'h4' ? 'ml-8' : ''}>
+              <a href={`#${heading.id}`} class="text-accent dark:text-accent-light">
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {featuredImageUrl && (
+      <figure class="mb-8">
+        <img
+          src={featuredImageUrl}
+          alt={featuredImageAlt}
+          class="w-full rounded-lg"
+          loading="eager"
+        />
+      </figure>
+    )}
+
+    <div class="rich-text" set:html={bodyHtml} />
+
+    <footer class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
+      <a href="/blog" class="text-accent dark:text-accent-light font-medium">
+        &larr; Back to blog
+      </a>
+    </footer>
+  </article>
+</Layout>
