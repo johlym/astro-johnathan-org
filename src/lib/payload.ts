@@ -69,6 +69,7 @@ const BASE = (import.meta.env.PAYLOAD_API_URL ?? "").replace(/\/$/, "");
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { Accept: "application/json" },
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`Payload API ${res.status}: ${BASE}${path}`);
   return res.json() as Promise<T>;
