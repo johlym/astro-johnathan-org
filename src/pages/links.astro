@@ -1,0 +1,30 @@
+---
+export const prerender = false
+
+import Layout from '../layouts/Layout.astro'
+import RichText from '../components/RichText.astro'
+import { getPage } from '../lib/payload'
+import RaindropIoLinks from '../components/RaindropIoLinks.astro'
+
+let page
+try {
+  const result = await getPage('links')
+  page = result.docs[0] ?? null
+} catch {
+  page = null
+}
+
+if (!page) return Astro.redirect('/404')
+---
+
+<Layout title={page.title} description={page.excerpt}>
+  <article>
+    <header class="mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold">{page.title}</h1>
+    </header>
+
+    <RichText content={page.body} class="rich-text" />
+
+    <RaindropIoLinks />
+  </article>
+</Layout>
