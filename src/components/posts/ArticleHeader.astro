@@ -9,6 +9,7 @@ interface Props {
   backLabel?: string
   showAuthorMeta?: boolean
   tags?: string[]
+  wordCount?: string
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   backLabel = 'Back to posts',
   showAuthorMeta = false,
   tags = [],
+  wordCount,
 } = Astro.props
 
 const allTags = [...tags, ...(category ? [category] : [])]
@@ -71,19 +73,28 @@ const dateStr = date
       )}
 
       {showAuthorMeta && date && (
-        <div class="flex items-center justify-between gap-4 py-6 border-t border-b border-neutral-800">
-            <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4 py-6 border-t border-b border-neutral-800">
+            <div class="flex items-center gap-6">
               <div>
-                <p class="text-neutral-100 text-sm font-heading">johnathan lyman</p>
-                <p class="text-neutral-600 text-xs">guy who wrote this</p>
+                <p class="text-neutral-600 text-xs mb-0.5">guy who wrote this</p>
+                <p class="text-neutral-100 text-xs font-heading lowercase">johnathan lyman</p>
               </div>
             </div>
 
           {date && (
-            <div class="flex items-center gap-6">
+            <div class="flex flex-1 justify-end gap-6 shrink-0">
               <div class="text-right">
                 <p class="text-neutral-600 text-xs mb-0.5">published</p>
-                <p class="text-neutral-400 text-xs font-heading lowercase">{dateStr}</p>
+                <p class="text-neutral-100 text-xs font-heading lowercase">{dateStr}</p>
+              </div>
+            </div>
+          )}
+
+          {wordCount && (
+            <div class="flex items-center gap-6 shrink-0">
+              <div class="text-right">
+                <p class="text-neutral-600 text-xs mb-0.5">words</p>
+                <p class="text-neutral-100 text-xs font-heading lowercase">{wordCount}</p>
               </div>
             </div>
           )}

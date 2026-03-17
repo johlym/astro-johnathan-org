@@ -88,6 +88,10 @@ const dateStr = dateObj
   : ''
 const dateIso = dateObj?.toISOString() ?? ''
 const metaCategory = category ?? categoryTitle
+const rawText = mdEntry
+  ? (mdEntry.body ?? '').replace(/[#*`[\]()>_~|!]+/g, ' ')
+  : bodyHtml.replace(/<[^>]+>/g, ' ')
+const wordCount = rawText.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length.toLocaleString('en-US')
 ---
 
 <Layout title={title} description={excerpt}>
@@ -100,6 +104,7 @@ const metaCategory = category ?? categoryTitle
     backHref="/blog"
     backLabel="Back to posts"
     showAuthorMeta={true}
+    wordCount={wordCount}
   />
 
   <Content>
