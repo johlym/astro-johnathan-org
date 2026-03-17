@@ -26,7 +26,8 @@
     if (!container) return
 
     try {
-      const res = await fetch('/api/links.json')
+      const base = (import.meta.env.PUBLIC_PAYLOAD_API_URL as string ?? '').replace(/\/$/, '')
+      const res = await fetch(`${base}/api/raindrop`)
       const sections: Section[] = await res.json()
 
       if (!sections.length) {
