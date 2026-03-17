@@ -1,19 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import { getPosts, getSiteSettings } from '../lib/payload'
+import { getPosts } from '../lib/payload'
 import { getMdPosts } from '../lib/mdposts'
 
 const LIMIT = 5
-
-let siteTitle = 'My Site'
-let siteDescription = ''
-try {
-  const settings = await getSiteSettings()
-  siteTitle = settings.siteTitle || 'My Site'
-  siteDescription = settings.siteDescription || ''
-} catch {
-  // fallback
-}
 
 type RecentPost = { slug: string; title: string; date: Date; excerpt?: string }
 
@@ -48,7 +38,7 @@ if (recentPosts.length < LIMIT) {
 }
 ---
 
-<Layout title={siteTitle} description={siteDescription}>
+<Layout>
   {recentPosts.length > 0 && (
     <section>
       <h2 class="text-2xl font-semibold mb-6">Recent Posts</h2>
