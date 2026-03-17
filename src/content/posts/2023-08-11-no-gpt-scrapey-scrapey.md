@@ -9,8 +9,6 @@ draft: false
 category: programming
 ---
 
-<!-- @format -->
-
 A short but sweet post. Ready?
 
 OpenAI quietly published the crawler name/user agent for ChatGPT, creatively named GPTBot.
