@@ -118,7 +118,7 @@ The third step is `attach_workspace`. This was more relevant when I had multiple
 ```yaml
 - restore_cache:
     keys:
-      - v1-bundle-{% raw %}{{ checksum "Gemfile.lock" }}{% endraw %}-{% raw %}{{ checksum "package.json" }}{% endraw %}
+      - v1-bundle-{{ checksum "Gemfile.lock" }}-{{ checksum "package.json" }}
 ```
 
 This part is important if there's even a stretch goal of having a speedy build process. &nbsp;The `restore_cache` step looks for a cache file that we've already built (something we'll do at the end) to save time with things like `bundle` and `npm`. Without this, we could spend a few minutes just installing Rubygems and Node modules. bleh.
@@ -130,15 +130,15 @@ One potential spot for improvement here is to break this out into two separate c
 ### Installations
 
 ```yaml
-- run: 
+- run:
     name: Install Rubygems if necessary
     command: |
       bundle install --path vendor/bundle --jobs 4 --retry 3
-- run: 
-    name: Install Node modules if necessary 
+- run:
+    name: Install Node modules if necessary
     command: |
       cd ~/repo && npm install
-- run: 
+- run:
     name: Install Rsync
     command: |
       sudo apt install rsync
@@ -149,7 +149,7 @@ This part is pretty straight forward. I need to make sure all the required Rubyg
 ### Site building
 
 ```yaml
-- run: 
+- run:
     name: Build site
     command: |
       bundle exec jekyll build --profile --verbose --destination /home/circleci/repo/_site
@@ -173,7 +173,7 @@ You'll notice we need to use [`npx`](https://github.com/zkat/npx) here. For some
 ### Server Push
 
 ```yaml
-- run: 
+- run:
     name: Deploy to prod server if triggered via master branch change
     command: |
       if [$CIRCLE_BRANCH = 'master']; then rsync -e "ssh -o StrictHostKeyChecking=no" -va --delete ~/repo/_site deploy@159.65.70.80:/var/www/johnathan.org/static; fi
@@ -190,7 +190,7 @@ For all intents and purposes, the deployment is done, but because of Cloudflare,
 (we're still in the `jobs` context)
 
 ```yaml
-- run: 
+- run:
     name: Bust Cloudflare cache if triggered via master branch change
     command: |
       if [$CIRCLE_BRANCH = 'master']; then 
@@ -209,7 +209,7 @@ I wouldn't recommend this for high-volume sites, but because I have Cloudflare c
 
 ```yaml
 - save_cache:
-    key: v1-bundle-{% raw %}{{ checksum "Gemfile.lock" }}{% endraw %}-{% raw %}{{ checksum "package.json" }}{% endraw %}
+    key: v1-bundle-{{ checksum "Gemfile.lock" }}-{{ checksum "package.json" }}
     paths:
       - ~/repo/vendor/bundle
       - ~/repo/node_modules
@@ -234,4 +234,3 @@ I used to have multiple jobs running in a breakout-combine pattern, and this is 
 That about does it for my overview. This process is turning out to work very well for me and I'm glad I took the time to both develop it and explain it for posterity. Over time, it'll morph, I'm sure, but right now this feels like a really good bass to work off of.
 
 Thanks for taking the time to read this. Cheers!
-
