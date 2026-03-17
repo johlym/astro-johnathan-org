@@ -1,0 +1,95 @@
+---
+interface Props {
+  title: string
+  excerpt?: string
+  date?: Date
+  authorName?: string
+  category?: string | null
+  backHref?: string
+  backLabel?: string
+  showAuthorMeta?: boolean
+  tags?: string[]
+}
+
+const {
+  title,
+  excerpt,
+  date,
+  authorName,
+  category,
+  backHref,
+  backLabel = 'Back to posts',
+  showAuthorMeta = false,
+  tags = [],
+} = Astro.props
+
+const allTags = [...tags, ...(category ? [category] : [])]
+
+const ordinalSuffixes: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' }
+const rules = new Intl.PluralRules('en-US', { type: 'ordinal' })
+
+const dateStr = date
+  ? (() => {
+      const day = date.getDate()
+      const suffix = ordinalSuffixes[rules.select(day)]
+      const month = date.toLocaleDateString('en-US', { month: 'long' })
+      return `${month} ${day}${suffix}, ${date.getFullYear()}`
+    })()
+  : ''
+---
+
+<section class="w-full bg-neutral-950 pt-20 pb-6 border-t border-neutral-800">
+  <div class="max-w-3xl mx-auto px-6">
+
+    {backHref && (
+      <div class="mb-12">
+        <a
+          href={backHref}
+          class="inline-flex items-center gap-2 text-neutral-600 text-xs lowercase tracking-wide hover:text-lime-400 transition-colors font-heading no-underline"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M19.5 12h-15m0 0l6.75 6.75M4.5 12l6.75-6.75"></path>
+          </svg>
+          {backLabel}
+        </a>
+      </div>
+    )}
+
+    <header class="mb-12">
+      {allTags.length > 0 && (
+        <div class="flex items-center gap-3 mb-6">
+          {allTags.map((tag) => (
+            <span class="text-xs text-neutral-700 bg-neutral-900 px-2 py-1 font-heading">{tag}</span>
+          ))}
+        </div>
+      )}
+
+      <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading leading-tight mb-6">{title}</h1>
+
+      {excerpt && (
+        <p class="text-neutral-400 text-base leading-relaxed mb-10">{excerpt}</p>
+      )}
+
+      {showAuthorMeta && date && (
+        <div class="flex items-center justify-between gap-4 py-6 border-t border-b border-neutral-800">
+            <div class="flex items-center gap-3">
+              <div>
+                <p class="text-neutral-100 text-sm font-heading">johnathan lyman</p>
+                <p class="text-neutral-600 text-xs">guy who wrote this</p>
+              </div>
+            </div>
+
+          {date && (
+            <div class="flex items-center gap-6">
+              <div class="text-right">
+                <p class="text-neutral-600 text-xs mb-0.5">published</p>
+                <p class="text-neutral-400 text-xs font-heading lowercase">{dateStr}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </header>
+
+  </div>
+</section>

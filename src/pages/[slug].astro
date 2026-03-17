@@ -2,6 +2,7 @@
 export const prerender = false
 
 import Layout from '../layouts/Layout.astro'
+import ArticleHeader from '../components/posts/ArticleHeader.astro'
 import RichText from '../components/RichText.astro'
 import { getPage } from '../lib/payload'
 
@@ -21,11 +22,14 @@ if (!page) return Astro.redirect('/404')
 ---
 
 <Layout title={page.title} description={page.excerpt}>
-  <article>
-    <header class="mb-8">
-      <h1 class="text-3xl md:text-4xl font-bold">{page.title}</h1>
-    </header>
+  <ArticleHeader
+    title={page.title}
+    excerpt={page.excerpt}
+  />
 
-    <RichText content={page.body} class="rich-text" />
-  </article>
+  <section class="content-container w-full bg-neutral-950 pb-16">
+    <div class="max-w-3xl mx-auto px-6">
+      <RichText content={page.body} class="rich-text" />
+    </div>
+  </section>
 </Layout>

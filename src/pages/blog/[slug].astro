@@ -2,6 +2,11 @@
 export const prerender = false
 
 import Layout from '../../layouts/Layout.astro'
+import Content from '../../components/Content.astro'
+import ArticleHeader from '../../components/posts/ArticleHeader.astro'
+import TableOfContents from '../../components/posts/TableOfContents.astro'
+import FeaturedImage from '../../components/posts/FeaturedImage.astro'
+
 import { getPost } from '../../lib/payload'
 import { lexicalToHtml, extractHeadings } from '../../lib/richtext'
 import { render } from 'astro:content'
@@ -86,56 +91,29 @@ const metaCategory = category ?? categoryTitle
 ---
 
 <Layout title={title} description={excerpt}>
-  <article>
-    <header class="mb-8">
-      <h1 class="text-3xl md:text-4xl font-bold mb-3">{title}</h1>
-      <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-        {dateObj && <time datetime={dateIso}>{dateStr}</time>}
-        {authorName && <><span>&middot;</span><span>{authorName}</span></>}
-        {metaCategory && <><span>&middot;</span><span>{metaCategory}</span></>}
-      </div>
-      {excerpt && (
-        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 italic">{excerpt}</p>
-      )}
-    </header>
+  <ArticleHeader
+    title={title}
+    excerpt={excerpt}
+    date={dateObj ?? undefined}
+    authorName={authorName ?? undefined}
+    tags={metaCategory ? [metaCategory] : []}
+    backHref="/blog"
+    backLabel="Back to posts"
+    showAuthorMeta={true}
+  />
 
+  <Content>
     {showToc && (
-      <nav class="mb-8 p-4 rounded-lg bg-gray-100 dark:bg-gray-800" aria-label="Table of Contents">
-        <p class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-3">
-          Contents
-        </p>
-        <ul class="space-y-1.5 text-sm">
-          {tocItems.map((item) => {
-            const indent =
-              (item.depth === 3 || item.tag === 'h3') ? 'ml-4' :
-              (item.depth === 4 || item.tag === 'h4') ? 'ml-8' : ''
-            return (
-              <li class={indent}>
-                <a href={`#${item.id}`} class="text-accent dark:text-accent-light">
-                  {item.text}
-                </a>
-              </li>
-            )
-          })}
-        </ul>
-      </nav>
+      <TableOfContents items={tocItems} />
     )}
 
     {featuredImageUrl && (
-      <figure class="mb-8">
-        <img src={featuredImageUrl} alt={featuredImageAlt} class="w-full rounded-lg" loading="eager" />
-      </figure>
+      <FeaturedImage src={featuredImageUrl} alt={featuredImageAlt} />
     )}
 
     {MdContent
-      ? <div class="rich-text prose dark:prose-invert max-w-none"><MdContent /></div>
+      ? <div class="rich-text"><MdContent /></div>
       : <div class="rich-text" set:html={bodyHtml} />
     }
-
-    <footer class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
-      <a href="/blog" class="text-accent dark:text-accent-light font-medium">
-        &larr; Back to blog
-      </a>
-    </footer>
-  </article>
+  </Content>
 </Layout>

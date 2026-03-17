@@ -2,6 +2,8 @@
 export const prerender = false
 
 import Layout from '../layouts/Layout.astro'
+import Content from '../components/Content.astro'
+import ArticleHeader from '../components/posts/ArticleHeader.astro'
 import RichText from '../components/RichText.astro'
 import { getPage } from '../lib/payload'
 import RaindropIoLinks from '../components/RaindropIoLinks.astro'
@@ -18,13 +20,13 @@ if (!page) return Astro.redirect('/404')
 ---
 
 <Layout title={page.title} description={page.excerpt}>
-  <article>
-    <header class="mb-8">
-      <h1 class="text-3xl md:text-4xl font-bold">{page.title}</h1>
-    </header>
+  <ArticleHeader
+    title={page.title}
+    excerpt={page.excerpt}
+  />
 
+  <Content>
     <RichText content={page.body} class="rich-text" />
-
     <RaindropIoLinks />
-  </article>
+  </Content>
 </Layout>

@@ -1,0 +1,19 @@
+---
+
+interface Props {
+  src: string;
+  alt: string;
+}
+
+const { src, alt } = Astro.props;
+
+---
+
+<div class="mb-12 overflow-hidden">
+  <img
+    src={src}
+    alt={alt}
+    class="w-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+    loading="eager"
+  />
+</div>

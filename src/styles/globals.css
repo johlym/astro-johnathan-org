@@ -1,104 +1,109 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --color-white: #f0f0f0;
-  --color-black: #222222;
-  --color-accent: rgb(92, 118, 160);
-  --color-accent-light: rgb(122, 148, 190);
-  --color-accent-dark: rgb(62, 88, 130);
-  --color-gray-100: #e5e5e5;
-  --color-gray-200: #d4d4d4;
-  --color-gray-300: #a3a3a3;
-  --color-gray-600: #525252;
-  --color-gray-700: #404040;
-  --color-gray-800: #333333;
-  --color-gray-900: #292929;
-
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: "JetBrains Mono", ui-monospace, monospace;
+  --font-heading: "Space Mono", ui-monospace, monospace;
 }
 
 @layer base {
   html {
-    @apply bg-white text-black antialiased;
-  }
-
-  html.dark {
-    @apply bg-black text-white;
+    @apply bg-neutral-950 text-neutral-100 antialiased;
   }
 
   body {
-    @apply font-sans leading-relaxed;
+    @apply font-body leading-relaxed;
   }
 
   a {
-    @apply text-accent underline decoration-accent/30 underline-offset-2 transition-colors hover:text-accent-light hover:decoration-accent/60;
+    @apply transition-colors;
   }
 
-  .dark a {
-    @apply text-accent-light hover:text-accent;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
   }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-  }
-
-  h1 { @apply text-3xl md:text-4xl; }
-  h2 { @apply text-2xl md:text-3xl; }
-  h3 { @apply text-xl md:text-2xl; }
-  h4 { @apply text-lg md:text-xl; }
 
   hr {
-    @apply my-8 border-gray-200;
-  }
-
-  .dark hr {
-    @apply border-gray-700;
+    @apply my-8 border-neutral-800;
   }
 
   pre {
-    @apply overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-white;
-  }
-
-  .dark pre {
-    @apply bg-gray-800;
+    @apply overflow-x-auto bg-neutral-900 p-4 text-sm text-neutral-100;
   }
 
   code:not(pre code) {
-    @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono;
-  }
-
-  .dark code:not(pre code) {
-    @apply bg-gray-800;
+    @apply bg-neutral-900 px-1.5 py-0.5 text-sm font-body;
   }
 
   blockquote {
-    @apply border-l-4 border-accent pl-4 italic text-gray-600;
-  }
-
-  .dark blockquote {
-    @apply text-gray-300;
+    @apply border-l-4 border-lime-400 pl-4 italic text-neutral-500;
   }
 }
 
-/* Rich text content styles */
+/* Rich text / post content styles */
+.rich-text {
+  @apply text-neutral-400 text-sm leading-relaxed;
+}
+
+.rich-text > * + * {
+  @apply mt-6;
+}
+
 .rich-text p {
-  @apply mb-4;
+  @apply text-neutral-400 text-sm leading-relaxed;
 }
 
 .rich-text h1,
 .rich-text h2,
 .rich-text h3,
 .rich-text h4 {
-  @apply mt-8 mb-4;
+  @apply font-heading text-neutral-100 pt-4;
+}
+
+.rich-text h1 {
+  @apply text-2xl;
+}
+.rich-text h2 {
+  @apply text-xl;
+}
+.rich-text h3 {
+  @apply text-lg;
+}
+.rich-text h4 {
+  @apply text-base;
+}
+
+.rich-text a,
+.content-container a {
+  @apply text-lime-400 hover:underline decoration-lime-400/40 underline-offset-2;
+}
+
+.rich-text strong {
+  @apply text-neutral-200 font-semibold;
+}
+
+.rich-text em {
+  @apply italic text-neutral-300;
+}
+
+.rich-text blockquote {
+  @apply border-l-2 border-lime-400 pl-6 py-2 my-10 not-italic;
+}
+
+.rich-text blockquote p {
+  @apply text-neutral-100 text-lg font-heading leading-snug;
 }
 
 .rich-text ul {
-  @apply mb-4 list-disc pl-6;
+  @apply list-disc pl-6;
 }
 
 .rich-text ol {
-  @apply mb-4 list-decimal pl-6;
+  @apply list-decimal pl-6;
 }
 
 .rich-text li {
@@ -106,9 +111,21 @@
 }
 
 .rich-text img {
-  @apply my-6 rounded-lg;
+  @apply w-full object-cover;
+}
+
+.rich-text figure {
+  @apply my-10 overflow-hidden;
+}
+
+.rich-text figcaption {
+  @apply text-neutral-700 text-xs mt-3;
 }
 
 .rich-text pre {
   @apply my-6;
+}
+
+.rich-text hr {
+  @apply my-8 border-neutral-800;
 }

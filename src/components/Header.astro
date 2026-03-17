@@ -1,5 +1,5 @@
 ---
-import DarkModeToggle from './DarkModeToggle.astro'
+import NavLink from './NavLink.astro'
 
 type NavLink = { href: string; label: string }
 
@@ -11,24 +11,18 @@ interface Props {
 const { siteTitle, navLinks = [] } = Astro.props
 ---
 
-<header class="border-b border-gray-200 dark:border-gray-700">
-  <nav class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a
-      href="/"
-      class="text-lg font-semibold no-underline text-black dark:text-white hover:text-accent dark:hover:text-accent-light"
-    >
-      {siteTitle}
+<header class="w-full bg-neutral-950 border-b border-neutral-800">
+  <nav class="max-w-3xl mx-auto px-6 py-6 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 group no-underline">
+      <div class="w-8 h-8 bg-lime-400 flex items-center justify-center">
+        <span class="text-neutral-950 text-xs font-bold leading-none">J.<br />ORG</span>
+      </div>
+      <span class="text-neutral-100 text-sm tracking-tight font-heading">{siteTitle}</span>
     </a>
-    <div class="flex items-center gap-6">
+    <div class="flex items-center gap-8">
       {navLinks.map((link) => (
-        <a
-          href={link.href}
-          class="text-sm no-underline text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent-light"
-        >
-          {link.label}
-        </a>
+        <NavLink href={link.href} label={link.label} />
       ))}
-      <DarkModeToggle />
     </div>
   </nav>
 </header>

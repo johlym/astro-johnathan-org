@@ -1,11 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro'
+import Hero from '../components/homepage/Hero.astro'
+import PostCard from '../components/homepage/PostCard.astro'
 import { getPosts } from '../lib/payload'
 import { getMdPosts } from '../lib/mdposts'
 
 const LIMIT = 5
 
-type RecentPost = { slug: string; title: string; date: Date; excerpt?: string }
+type RecentPost = { slug: string; title: string; date: Date; excerpt?: string; category?: string }
 
 let recentPosts: RecentPost[] = []
 
@@ -16,6 +18,10 @@ try {
     title: p.title,
     date: new Date(p.createdAt),
     excerpt: p.excerpt,
+    category:
+      p.category && typeof p.category === 'object' && 'title' in p.category
+        ? (p.category as { title: string }).title
+        : undefined,
   }))
 } catch {
   // Payload unavailable — will fill entirely from MD
@@ -30,6 +36,7 @@ if (recentPosts.length < LIMIT) {
       title: e.data.title,
       date: e.data.date,
       excerpt: e.data.excerpt ?? e.data.description,
+      category: e.data.category,
     }))
     recentPosts = [...recentPosts, ...mdFill]
   } catch {
@@ -39,37 +46,25 @@ if (recentPosts.length < LIMIT) {
 ---
 
 <Layout>
+  <Hero />
   {recentPosts.length > 0 && (
-    <section>
-      <h2 class="text-2xl font-semibold mb-6">Recent Posts</h2>
-      <div class="space-y-8">
+    <section class="w-full bg-neutral-950 pt-20 pb-6 border-t border-neutral-800">
+      <div class="max-w-3xl mx-auto px-6">
+        <div class="flex items-center justify-between mb-12">
+          <h2 class="text-neutral-100 text-xs uppercase tracking-widest font-heading">Latest Posts</h2>
+          <span class="text-neutral-700 text-xs">{new Date().getFullYear()}</span>
+        </div>
         {recentPosts.map((post) => (
-          <article class="group">
-            <a href={`/blog/${post.slug}`} class="no-underline block">
-              <h3 class="text-xl font-semibold text-black dark:text-white group-hover:text-accent dark:group-hover:text-accent-light transition-colors">
-                {post.title}
-              </h3>
-            </a>
-            <time
-              class="text-sm text-gray-600 dark:text-gray-300 mt-1 block"
-              datetime={post.date.toISOString()}
-            >
-              {post.date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </time>
-            {post.excerpt && (
-              <p class="mt-2 text-gray-600 dark:text-gray-300">{post.excerpt}</p>
-            )}
-          </article>
+          <PostCard post={post} />
         ))}
-      </div>
-      <div class="mt-8">
-        <a href="/blog" class="text-accent dark:text-accent-light font-medium">
-          View all posts &rarr;
-        </a>
+        <div class="pt-8 mt-4">
+          <a href="/blog" class="inline-flex items-center gap-2 text-lime-400 text-xs uppercase tracking-widest hover:gap-4 transition-all font-heading no-underline">
+            View all posts
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
+            </svg>
+          </a>
+        </div>
       </div>
     </section>
   )}
