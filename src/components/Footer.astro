@@ -10,6 +10,6 @@ const elapsed = pageStart != null ? Math.round(performance.now() - pageStart) : 
 
 <footer class="border-t border-gray-200 dark:border-gray-700 mt-auto">
   <div class="max-w-2xl mx-auto px-4 py-6 text-center text-sm text-gray-600 dark:text-gray-300">
-    &copy; {new Date().getFullYear()} {siteTitle} | Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a> and <a href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">Payload CMS</a> | {elapsed != null && ` | Page generated in ${elapsed}ms`}
+    &copy; {new Date().getFullYear()} {siteTitle} | Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a> and <a href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">Payload CMS</a>{elapsed != null && ` | Page generated in ${elapsed}ms`}
   </div>
 </footer>
