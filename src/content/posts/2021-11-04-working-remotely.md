@@ -22,9 +22,6 @@ All are valid.
 
 You're seeing this post, though, so only one of those outcomes came to fruition. Guess which one.
 
-* toc
-{:toc}
-
 ## Prologue
 
 When I put together this outline in 2016, my position was a lot simpler. I just took my first remote job and started my transition to work-from-home life. Back then, working from home was reserved for a slice of the tech-worker population in well-to-do countries: those with the resources to afford a space of their own to use for hammering out the wares they made. Some, like myself, had to make adjustments to their home environment to make things work, but they did.
@@ -65,7 +62,7 @@ Working remotely (from home) was going to solve a few specific things for me (Yo
 
 In essence, I needed a position that was tailored for this type of work-life balance. A company built around butts in seats and fields of desks in an office but is trying to do its first remote thing was not going to cut it. The remote-ness of the work must be deliberate.
 
-* * *
+---
 
 A side note on offices: when I wrote the original version of this outline almost six years ago, I was on the downward swing of appreciation for office space. I more or less hated the idea, and the few times I spent in an office over the coming years never felt right. I could have very well biased myself with my strong motivation to avoid an office.
 
@@ -75,7 +72,7 @@ I saw this play out in my wife's transition from working in an office to working
 
 Imagine how powerful the transition could be if they _intentionally_ switched to being a remote, distributed workforce rather than doing so out of necessity.
 
-* * *
+---
 
 ### On Distractions and The Ritual of Remote Work
 
@@ -142,4 +139,3 @@ Neither my mother nor my wife read mile-long blog posts from tech dudes like mys
 Now, there's nothing left to talk about. It's all figured out. It's for the better, too. Will some new entrants have no idea what to do? Today, though, resources abound.
 
 Maybe waiting six years to write this so thought leaders could do their thing was subconsciously always part of the plan.
-
