@@ -54,7 +54,7 @@
 }
 
 .rich-text p {
-  @apply text-neutral-400 text-sm leading-relaxed;
+  @apply text-neutral-400 text-[15px] leading-relaxed my-4 mx-0;
 }
 
 .rich-text h1,
