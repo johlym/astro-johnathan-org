@@ -10,7 +10,12 @@ const page = Math.max(1, parseInt(pageParam || '1', 10) || 1)
 const limit = 10
 
 // ── CMS posts (always fetch to get totalDocs, even if page > cmsPages) ───────
-const cmsResult = await getPosts(page, limit)
+let cmsResult: Awaited<ReturnType<typeof getPosts>> = { docs: [], totalDocs: 0, limit: 10, totalPages: 0, page: 1, hasPrevPage: false, hasNextPage: false, prevPage: null, nextPage: null }
+try {
+  cmsResult = await getPosts(page, limit)
+} catch (err) {
+  console.error('[blog] getPosts failed:', err)
+}
 const cmsTotalDocs = cmsResult.totalDocs
 const cmsTotalPages = Math.ceil(cmsTotalDocs / limit)
 // How many CMS posts appear on the last CMS page
@@ -21,7 +26,13 @@ const mdFillCount = cmsLastPageCount > 0 && cmsLastPageCount < limit
   : 0
 
 // ── Legacy MD posts (compiled at build time — no network) ────────────────────
-const allMdPosts = await getMdPosts()
+let allMdPosts: Awaited<ReturnType<typeof getMdPosts>> = []
+try {
+  allMdPosts = await getMdPosts()
+} catch (err) {
+  console.error('[blog] getMdPosts failed:', err)
+}
+console.log(`[blog] MD posts loaded: ${allMdPosts.length}`)
 const mdTotal = allMdPosts.length
 
 // ── Combined total pages ──────────────────────────────────────────────────────

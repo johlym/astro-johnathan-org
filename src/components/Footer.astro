@@ -1,13 +1,15 @@
 ---
 interface Props {
   siteTitle: string
+  pageStart?: number
 }
 
-const { siteTitle } = Astro.props
+const { siteTitle, pageStart } = Astro.props
+const elapsed = pageStart != null ? Math.round(performance.now() - pageStart) : null
 ---
 
 <footer class="border-t border-gray-200 dark:border-gray-700 mt-auto">
   <div class="max-w-2xl mx-auto px-4 py-6 text-center text-sm text-gray-600 dark:text-gray-300">
-    &copy; {new Date().getFullYear()} {siteTitle}
+    &copy; {new Date().getFullYear()} {siteTitle} | Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>{elapsed != null && ` | Page generated in ${elapsed}ms`}
   </div>
 </footer>

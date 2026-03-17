@@ -1,12 +1,9 @@
 ---
+export const prerender = false
+
 import Layout from '../layouts/Layout.astro'
 import RichText from '../components/RichText.astro'
-import { getPage, getAllPageSlugs } from '../lib/payload'
-
-export async function getStaticPaths() {
-  const { docs } = await getAllPageSlugs()
-  return docs.map((page) => ({ params: { slug: page.slug } }))
-}
+import { getPage } from '../lib/payload'
 
 const { slug } = Astro.params
 
