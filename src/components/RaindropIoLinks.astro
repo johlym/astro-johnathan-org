@@ -49,13 +49,13 @@
               const tags = link.tags.length > 0 ? ` (${esc(link.tags.join(', '))})` : ''
               return `<li>
                 <a href="${esc(link.link)}" target="_blank" rel="noopener noreferrer"
-                  class="font-medium text-accent dark:text-accent-light hover:underline">${esc(link.title)}</a>
+                  class="font-normal text-accent dark:text-accent-light hover:underline">${esc(link.title)}</a>
                 <div class="text-sm text-gray-600 dark:text-gray-400">${esc(link.domain)}${tags}</div>
               </li>`
             })
             .join('')
           return `<section id="${slugify(section.title)}" class="mb-10">
-            <h2 class="text-xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">${esc(section.title)}</h2>
+            <h2 class="text-xl font-bold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">${esc(section.title)}</h2>
             <ul class="space-y-4">${items}</ul>
           </section>`
         })

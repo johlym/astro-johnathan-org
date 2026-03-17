@@ -83,7 +83,7 @@
 }
 
 .rich-text strong {
-  @apply text-neutral-200 font-semibold;
+  @apply text-neutral-200 font-bold;
 }
 
 .rich-text em {
