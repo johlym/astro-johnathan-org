@@ -1,104 +1,75 @@
 ---
-const TOKEN = import.meta.env.RAINDROP_API_TEST_TOKEN
-const BASE = 'https://api.raindrop.io/rest/v1'
-
-type Collection = {
-  _id: number
-  title: string
-  count: number
-}
-
-type Raindrop = {
-  _id: number
-  title: string
-  link: string
-  domain: string
-  tags: string[]
-  created: string
-}
-
-async function raindropFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-    cache: 'no-store',
-  })
-  if (!res.ok) throw new Error(`Raindrop API ${res.status}: ${path}`)
-  return res.json() as Promise<T>
-}
-
-async function getAllRaindrops(collectionId: number): Promise<Raindrop[]> {
-  const all: Raindrop[] = []
-  let page = 0
-  while (true) {
-    const data = await raindropFetch<{ items: Raindrop[]; count: number }>(
-      `/raindrops/${collectionId}?sort=-created&perpage=50&page=${page}`
-    )
-    all.push(...data.items)
-    if (all.length >= data.count || data.items.length < 50) break
-    page++
-  }
-  return all
-}
-
-type CollectionWithLinks = Collection & { links: Raindrop[] }
-let sections: CollectionWithLinks[] = []
-
-try {
-  if (!TOKEN) throw new Error('RAINDROP_API_TEST_TOKEN is not set')
-  const colData = await raindropFetch<{ items: Collection[] }>('/collections')
-  const populated = colData.items.filter((c) => c.count > 0)
-  const withLinks = await Promise.all(
-    populated.map(async (col) => ({
-      ...col,
-      links: await getAllRaindrops(col._id),
-    }))
-  )
-  sections = withLinks.sort((a, b) => a.title.localeCompare(b.title))
-} catch (err) {
-  console.error('[RaindropIoLinks]', err)
-}
-
-const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 ---
 
-{sections.length === 0 && (
-  <p class="text-gray-500 dark:text-gray-400">No links available.</p>
-)}
+<div id="raindrop-links" aria-live="polite">
+  <p class="text-gray-500 dark:text-gray-400 animate-pulse">Loading links…</p>
+</div>
 
-{sections.length > 0 && (
-  <nav class="flex flex-wrap gap-x-4 gap-y-1 mb-10 text-sm">
-    {sections.map((section) => (
-      <a
-        href={`#${slugify(section.title)}`}
-        class="text-accent dark:text-accent-light hover:underline"
-      >
-        {section.title}
-      </a>
-    ))}
-  </nav>
-)}
+<script>
+  function esc(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
 
-{sections.map((section) => (
-  <section id={slugify(section.title)} class="mb-10">
-    <h2 class="text-xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-      {section.title}
-    </h2>
-    <ul class="space-y-4">
-      {section.links.map((link) => (
-        <li>
-          <a
-            href={link.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="font-medium text-accent dark:text-accent-light hover:underline"
-          >
-            {link.title}
-          </a>
-          <div class="text-sm text-gray-600 dark:text-gray-400">
-            {link.domain}{link.tags.length > 0 && ` (${link.tags.join(', ')})`}
-          </div>
-        </li>
-      ))}
-    </ul>
-  </section>
-))}
+  function slugify(s: string): string {
+    return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  }
+
+  type Raindrop = { title: string; link: string; domain: string; tags: string[] }
+  type Section = { title: string; links: Raindrop[] }
+
+  async function loadLinks() {
+    const container = document.getElementById('raindrop-links')
+    if (!container) return
+
+    try {
+      const res = await fetch('/api/links.json')
+      const sections: Section[] = await res.json()
+
+      if (!sections.length) {
+        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No links available.</p>'
+        return
+      }
+
+      const nav = sections
+        .map(
+          (s) =>
+            `<a href="#${slugify(s.title)}" class="text-accent dark:text-accent-light hover:underline">${esc(s.title)}</a>`,
+        )
+        .join('')
+
+      const sectionsHtml = sections
+        .map((section) => {
+          const items = section.links
+            .map((link) => {
+              const tags = link.tags.length > 0 ? ` (${esc(link.tags.join(', '))})` : ''
+              return `<li>
+                <a href="${esc(link.link)}" target="_blank" rel="noopener noreferrer"
+                  class="font-medium text-accent dark:text-accent-light hover:underline">${esc(link.title)}</a>
+                <div class="text-sm text-gray-600 dark:text-gray-400">${esc(link.domain)}${tags}</div>
+              </li>`
+            })
+            .join('')
+          return `<section id="${slugify(section.title)}" class="mb-10">
+            <h2 class="text-xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">${esc(section.title)}</h2>
+            <ul class="space-y-4">${items}</ul>
+          </section>`
+        })
+        .join('')
+
+      container.innerHTML = `
+        <nav class="flex flex-wrap gap-x-4 gap-y-1 mb-10 text-sm">${nav}</nav>
+        ${sectionsHtml}
+      `
+    } catch (err) {
+      console.error('[RaindropIoLinks]', err)
+      const c = document.getElementById('raindrop-links')
+      if (c) c.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Failed to load links.</p>'
+    }
+  }
+
+  loadLinks()
+</script>
