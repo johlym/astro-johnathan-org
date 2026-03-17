@@ -40,7 +40,7 @@ This configuration only lasted a couple months as we approach present day. I had
 
 When I got to a point where I'd be comfortable sharing it with the world, [I posted a picture](https://www.instagram.com/p/BTFw4hNlhlz/?taken-by=_lyman) (the same one you see in the header of this post) [on Instagram](https://www.instagram.com/p/BTFw4hNlhlz/?taken-by=_lyman). Turns out Instagram loves this stuff and ate it up. If I ever seriously wanted to increase my _Brand_, this would be how I'd do it. (lol)
 
-{% cloudinary_img "IMG_3632_jofipc", "IMG_3632_jofipc", "standard" %}
+{% cloudinary_img "IMG_3632_jofipc", "IMG_3632_jofipc">
 
 ### The Pieces
 
@@ -84,4 +84,3 @@ Here's what you see in the photo–with relevant links:
 ## Or is it?
 
 At the time of this writing, I still have a couple tweaks to make. I need to create a more permanent home for my work Macbook Pro in the form of a vertical stand (probably from Twelve South) and a desk mat. One of the downsides to this butcher-block wood slab is it's not a super smooth texture. Butcher-block requires treatment if it's going to get wet, something I haven't done, and probably won't do for some time. In a few months, who knows what I'll end up doing. I'm moving again next October into hopefully a more permanent home so this build might need some tweaking. Who knows, really…
-

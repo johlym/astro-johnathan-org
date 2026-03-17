@@ -13,7 +13,7 @@ Anyone that's stayed in a hotel knows the power outlet situation is varied. best
 
 Enter the [Anker PowerPort Mini](https://amzn.to/2oKPv6A). A 2-port USB 2.4A wall plug with Power IQ support that's about the size of a golf ball. The prongs fold in to make itself a bit more portable, which is nice when comparing it to the size of Apple's single port 5W brick.
 
-{% cloudinary_img "Powerport size comparison 1", "powerport_size_comparison_1.jpeg "powerport_size_comparison_1.jpeg"", "standard" %}
+{% cloudinary_img "Powerport size comparison 1", "powerport_size_comparison_1.jpeg "powerport_size_comparison_1.jpeg"">
 
 While it's not the smallest charging brick in the world, the fact that it provides two ports will more than make up for it. The alternative in this comparison is to have two Apple bricks that would take up two outlets. In the image above the coin in a Canadian quarter. The height is about 75% greater, but it definitely doesn't feel big in my hand. If anything, holding the Apple brick afterward makes the Apple brick feel very small and almost inadequate.
 
@@ -22,4 +22,3 @@ When it comes to weight, the Anker PowerPort Mini clocks in at 38 grams, a 41% i
 Getting technical for a moment regarding the specs, the PowerPort Mini puts out a total of 12 watts at 2.4A. This means plugging one device into it gets a 12 watts 2.4A charge, and two devices gets 6 watts each. Not earth-shattering, but if you're in need of charging several mobile-type devices overnight like I am, 6 watts will be perfect.
 
 You can [pick up A PowerPort Mini 2-pack on Amazon for about $16](https://amzn.to/2oKPv6A) right now. I suggest you do. Anker's quality is great for the price and while I'm sure there are cheaper options, spending the extra couple dollars gets you a sane purchase and a quality item.
-

@@ -20,19 +20,19 @@ My baby of a server has, for the last five or so months, been filling [Newrelic]
 
 **CPU**
 
-{% cloudinary_img, "loaded_server_before_cpu", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_before_cpu">
 
 **Memory**
 
-{% cloudinary_img, "loaded_server_before_mem", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_before_mem">
 
 **Disk**
 
-{% cloudinary_img, "loaded_server_before_disk", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_before_disk">
 
 **Load**
 
-{% cloudinary_img, "loaded_server_before_load", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_before_load">
 
 So I'm just going to go ahead and say that's not good. The only graph above that's even remote decent is the Disk graph, but it's washed over by the CPU > 80% indication so it's also pretty much hosed.
 
@@ -52,21 +52,20 @@ I still couldn't figure out why my disk usage was so high, though. Leave it to m
 
 **CPU**
 
-{% cloudinary_img, "loaded_server_after_cpu", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_after_cpu">
 
 **Memory**
 
-{% cloudinary_img, "loaded_server_after_mem", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_after_mem">
 
 **Disk**
 
-{% cloudinary_img, "loaded_server_after_disk", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_after_disk">
 
 **Load**
 
-{% cloudinary_img, "loaded_server_after_load", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/loaded_server_after_load">
 
 Sorry this story wasn't more interesting. If you're curious, my Jekyll build time was cut in half.
 
 That's about it. Orphaned tools and processes makes my server a dull VPS.
-

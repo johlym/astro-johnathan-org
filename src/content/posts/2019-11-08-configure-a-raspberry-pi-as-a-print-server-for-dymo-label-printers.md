@@ -137,31 +137,30 @@ https://localhost:631/admin
 
 Your browser will probably complain about the SSL certificate. Skip through that, if necessary. You'll land on a page that looks something like this:
 
-{% cloudinary_img, "Screen-Shot-2019-11-08-at-4.44.20-PM-1024x715", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screen-Shot-2019-11-08-at-4.44.20-PM-1024x715">
 
 1. Click the **Add Printer** button under the _Printers_ section. Select the Dymo printer and click **Continue**.
 
-{% cloudinary_img, "Screen-Shot-2019-11-08-at-4.45.34-PM-1024x715", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screen-Shot-2019-11-08-at-4.45.34-PM-1024x715">
 
 2. Fill in the fields as you see fit and make sure to check **Share This Printer** before clicking **Continue** :
 
-{% cloudinary_img, "Screen-Shot-2019-11-08-at-4.48.03-PM-1024x715", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screen-Shot-2019-11-08-at-4.48.03-PM-1024x715">
 
 If everything went according to plan in Part 2, the relevant drivers should appear, with the specific printer at the top of the list.
 
-{% cloudinary_img, "Screen-Shot-2019-11-08-at-4.49.05-PM-1024x715", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screen-Shot-2019-11-08-at-4.49.05-PM-1024x715">
 
 If that's the case, leave everything as is and click **Add Printer**.
 
 Lastly, and optionally, set some default print settings and wrap up the setup by clicking **Set Default Options** :
 
-{% cloudinary_img, "Screen-Shot-2019-11-08-at-4.50.12-PM-1024x715", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screen-Shot-2019-11-08-at-4.50.12-PM-1024x715">
 
 The printer should be set and ready to go, and visible from the CUPS admin page:
 
-{% cloudinary_img, "Screen-Shot-2019-11-08-at-4.51.09-PM-1024x715", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screen-Shot-2019-11-08-at-4.51.09-PM-1024x715">
 
 ### Conclusion
 
 After doing this for the third time now I've found myself having to hack through some component of the printer driver process, save for this most recent effort (what I've documented in this post). I highly recommend doing everything via the package manager if you can help it. What made me think to include that as an option was noticing [the version of](https://launchpad.net/ubuntu/+source/dymo-cups-drivers/1.4.0-8)`dymo-cups-drivers` in the Ubuntu source repo was newer than what Dymo itself was offering. That version was also used to build `printer-driver-dymo`. When the metaphorical lightbulb came on, I realized this was probably a solution to my compile struggles.
-

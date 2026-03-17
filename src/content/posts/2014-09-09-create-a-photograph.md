@@ -13,8 +13,7 @@ _Time to Master: Infinity_
 
 There's a thought in the photography community which extends to pretty much any facet of life: you only get better by doing. One does not become a pro golfer by reading a book—although reading does help—nor does merely buying a professional-grade camera make you a good photographer. How does one become a pro, though? If that's a path you want to take, awesome. If not, don't worry, as this still applies to even those who want to excel at photography as a hobby or a small side gig to pass the time and pay the photography bills. I've broken it down into four super easy steps.
 
-{% cloudinary_img, "o7zkynkq1lm", "standard" %}
-
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/o7zkynkq1lm">
 
 ## Get.
 
@@ -29,7 +28,7 @@ At the start of this little conversation I told you a high-end camera does not a
 
 Now that you've collected your gear, it's time to get outside and make a photograph of something. (If you have the space, resources, and ability, you can make a photograph indoors, too, but it's generally cheaper to walk outside than to buy studio equipment.
 
-{% cloudinary_img, "qtr6sfco3zg", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/qtr6sfco3zg">
 
 ## Do.
 
@@ -39,7 +38,7 @@ If you haven't taken a photo of more than your cat, do take a photo of something
 
 Once you've taken your daily photo, go take a hundred more of different things. Go to a park. A zoo. A car show. Walk down the street. Walk up the street. Find a bug. Find two bugs. Find a bug killing a bug, National Geographic style! There should be zero people in your life pressuring you to perform here. If anything people around you should be supportive of your new endeavor. Maybe if you ask nicely, they'll pose for you! If you feel pressured to perform, remove that source of pressure from your life. Stop wishing. Stop comparing. Stop thinking. Now is not the time to think. Now is the time to do, to make. Getting the idea?
 
-{% cloudinary_img, "t6crnps0lm", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/t6crnps0lm">
 
 ## Look.
 
@@ -47,9 +46,8 @@ Time to learn. You've taken a load of photos and are starting to get a hang of y
 
 Once you've consumed more videos and articles than your brain can handle, find photographers in niches you personally enjoy. Look at their work. Read their blogs. Follow them on Facebook, Twitter, Google+, Pinterest, 500px, and any other social networking site they use. Even better, don't just follow them, chat with them. Reach out to them for tips or really anything you can think of that would possibly help you! Once you've done that, steal from them. Specifically, **steal their look**. Try to make a photo that looks like that. If it's something like a landscape or wildlife, capture that same animal or area! When you've successfully done that, do it again, with another photographer. I'd be willing to bet cold hard money bags of money that the second photographer you follow or are otherwise interested in their work shoots differently than you do, with a different style. Once you've knocked out number two, go for a third, and a fourth. After every attempt or measure of success, make it your own. This'll help you figure out what your style is. You'll find yourself going back to what you like the most and over time, tweaking it to make it your own.
 
-{% cloudinary_img, "9hwwdcczgkg", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/9hwwdcczgkg">
 
 ## Repeat.
 
 So you've completed Step Learn. Now what? Do it all over! If only a small amount of time has passed (less than a year), start with Step Do. If it's been a bit of time or you have the ability to upgrade, do that, with the mindset that you're upgrading because you can improve yourself with your new gear in ways that you can easily quantify, not just because you like a red band on the end of your lens. You'll find this to be an endless cycle that even pros will execute from time to time. If you become a full-time professional, you'll _always_ be looking for ways to improve and making sure you have everything you need to be as creative and as successful as possible.
-

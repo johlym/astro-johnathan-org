@@ -14,7 +14,7 @@ My problem, nay my supreme life struggle lies with getting my Fitbit to sync. It
 
 Let me explain.
 
-{% cloudinary_img, "fitbit_sync_loop.gif", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/fitbit_sync_loop.gif">
 
 I've been told that more times than I'm willing to admit.
 
@@ -92,7 +92,7 @@ It's present day, and I'm currently struggling with this as I wrote this blog po
 
 After doing the ERASE dance, again, I've powered the device back on. It's currently 0:00 in the morning. I've added my tracker back to the app and I'm immediately prompted to update it. Let's give it a shot.
 
-Hmm, this is a different update screen. It looks more legit, and it's actually f*cking updating. This time, it invoked the update on the tracker and the progress bar appeared, something that never happened before. Perhaps my sync issue was the reason I couldn't update my Fitbit before? That's my theory.
+Hmm, this is a different update screen. It looks more legit, and it's actually f\*cking updating. This time, it invoked the update on the tracker and the progress bar appeared, something that never happened before. Perhaps my sync issue was the reason I couldn't update my Fitbit before? That's my theory.
 
 It says it may take up to ten minutes, but so far it's only taken about two to make it through the update. My hopes are starting to rise.
 
@@ -100,9 +100,8 @@ The update is done. It took about three minutes. All-day Sync is on. Alarms re-s
 
 But like last time, this is what I saw for about a week. Some follow up will be required.
 
-In summary, I hate to think this is how those who have the same issue as I have to fix their problem. What baffles me is Fitbit makes no effort to let you know there's a problem with the device when it can't sync, nor when it can't update the firmware. It seems like Fitbit literally gives zero f*cks. That's a terrible user experience. That's a terrible design process. It's terrible everything. They've been in the game long enough to know better.
+In summary, I hate to think this is how those who have the same issue as I have to fix their problem. What baffles me is Fitbit makes no effort to let you know there's a problem with the device when it can't sync, nor when it can't update the firmware. It seems like Fitbit literally gives zero f\*cks. That's a terrible user experience. That's a terrible design process. It's terrible everything. They've been in the game long enough to know better.
 
 I'm excited in hopes that this will solve my problem, but I'm also near the end of my patience with Fitbit as a whole. This comes after they send me a shitty Aria scale that after less than a week forgot how to weigh. (Paraphrased; It lost the ability to calibrate on its own.) The replacement works great. Per their instructions, I threw it in the trash. They literally didn't want it back. That literally tells me they literally know it's an issue, literally know what causes it, but literally haven't been able to prevent it from happening.
 
 Last chance, Fitbit. Don't let me down. I've been with you since September 2, 2014.
-

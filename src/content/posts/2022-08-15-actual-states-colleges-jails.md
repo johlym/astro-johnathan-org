@@ -9,29 +9,29 @@ draft: false
 category: data
 ---
 
-I stumbled into an article from Studee about [the U.S. States with more colleges than jails and prisons](http://studee.com/discover/usa-prison-v-college/), today. The presentation is disheartening, in that the vast majority of U.S. States are afflicted with large quantities of jails and prisons. 
+I stumbled into an article from Studee about [the U.S. States with more colleges than jails and prisons](http://studee.com/discover/usa-prison-v-college/), today. The presentation is disheartening, in that the vast majority of U.S. States are afflicted with large quantities of jails and prisons.
 
-*This post is a work in progress.*
+_This post is a work in progress._
 
-While I found it interesting, I also found it inaccurate. Their article described a college as one where an individual can get a four-year degree. However, that doesn't necessarily describe what a college is, and thus leaves out a few states. 
+While I found it interesting, I also found it inaccurate. Their article described a college as one where an individual can get a four-year degree. However, that doesn't necessarily describe what a college is, and thus leaves out a few states.
 
 Using the same data sources[^1][^2], I re-compiled the list to include schools that offer associates degrees, too. These are mostly community and technical colleges, and by all measures, are colleges.
 
-Tangentially, I also introduced a new variant of the data, including schools that offer certifications. Not every profession needs a college degree. 
+Tangentially, I also introduced a new variant of the data, including schools that offer certifications. Not every profession needs a college degree.
 
 ## Notes
 
-* The original article also reviews incarceration numbers and incarceration per capita and how those stats correlate to the number of college-education people within a state.
-* When adding certificate schools, we see almost half of the United States shift to the other side of the scale. This is good, but we shouldn't have to massage the stats that way.
-* I ultimately started down this rabbit hole because I took issue with how Studee defined a college. I felt some states were being displayed and measured incorrectly. Ultimately, adding 2-year schools only added a half-dozen states to the positive college-jail ratio.
+- The original article also reviews incarceration numbers and incarceration per capita and how those stats correlate to the number of college-education people within a state.
+- When adding certificate schools, we see almost half of the United States shift to the other side of the scale. This is good, but we shouldn't have to massage the stats that way.
+- I ultimately started down this rabbit hole because I took issue with how Studee defined a college. I felt some states were being displayed and measured incorrectly. Ultimately, adding 2-year schools only added a half-dozen states to the positive college-jail ratio.
 
 ## The U.S. States That Have More Colleges than Jails and Prisons
 
-{% cloudinary_img, "states_jails_2-4-schools", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/states_jails_2-4-schools">
 
 ## The U.S. States that Have More Colleges and Cert Schools than Jails and Prisons
 
-{% cloudinary_img, "states_2-4-year_cert_prisons", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/states_2-4-year_cert_prisons">
 
 ## Raw Data
 
@@ -94,4 +94,5 @@ Tangentially, I also introduced a new variant of the data, including schools tha
 ---
 
 [^1]: https://nces.ed.gov/collegenavigator/
+
 [^2]: https://nicic.gov/state-statistics/2019

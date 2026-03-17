@@ -15,7 +15,7 @@ Yep, I've never done this before, and it turned out pretty well… I think.
 
 In my opinion, maintaining a proper working development environment is one of the hardest things to do. Over time it can experience something I like to call “dev rot.” To make this as easy as possible, I invoked the assistance from a tool by the great folks over at Flywheel called Local. Local does one thing: let you build, maintain, and tear down WordPress development environments on a whim. It runs a Virtualbox-powered VM under the hood and if you use the Flywheel managed WordPress hosting service, allows you to push your development environment straight up to them for one-click production pushes. It's a fantastic tool and keeps things super clean.
 
-{% cloudinary_img, "flywheel_local-squashed", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/flywheel_local-squashed">
 
 ## Structure
 
@@ -63,10 +63,10 @@ My base `gulpfile.js` only contains a couple lines of code:
 
 ```js
 // /gulpfile.js
-var requireDir = require('require-dir');
+var requireDir = require("require-dir");
 
 // Require all tasks in gulp/tasks, including subfolders
-requireDir('./gulp/tasks', {recurse: true});
+requireDir("./gulp/tasks", { recurse: true });
 ```
 
 The first being bringing in `require-dir` in order to do the second thing, suck in all the tasks in the `gulp/tasks` directory. Within this directory, I have two main tasks: `gulp watch` and `gulp dist`. `gulp watch` triggers a few different sub tasks:
@@ -74,59 +74,40 @@ The first being bringing in `require-dir` in order to do the second thing, suck 
 ```js
 // gulp/tasks/watch.js
 
-var gulp = require('gulp');
-var runSequence = require('run-sequence');
+var gulp = require("gulp");
+var runSequence = require("run-sequence");
 
-gulp.task('watch', function (callback) {
-  runSequence(
-    'sass:compile',
-    'copy:dev',
-    'browsersync:production',
-    () => {
-      gulp.watch('app/**/*.php', () => {
-        runSequence(
-          'copy:dev',
-          'browsersync:reload'
-        );
-      });
-      gulp.watch('app/assets/scss/**/*.scss', () => {
-        runSequence(
-          'sass:compile',
-          'copy:dev',
-          'browsersync:reload'
-        );
-      });
-      gulp.watch('app/assets/js/**/*.js', () => {
-        runSequence(
-          'copy:dev',
-          'browsersync:reload'
-        );
-      });
-      return callback;
-    }
-  );
+gulp.task("watch", function (callback) {
+  runSequence("sass:compile", "copy:dev", "browsersync:production", () => {
+    gulp.watch("app/**/*.php", () => {
+      runSequence("copy:dev", "browsersync:reload");
+    });
+    gulp.watch("app/assets/scss/**/*.scss", () => {
+      runSequence("sass:compile", "copy:dev", "browsersync:reload");
+    });
+    gulp.watch("app/assets/js/**/*.js", () => {
+      runSequence("copy:dev", "browsersync:reload");
+    });
+    return callback;
+  });
 });
 ```
 
 ```js
 // gulp/tasks/dist.js
 
-var gulp = require('gulp');
-var runSequence = require('run-sequence');
+var gulp = require("gulp");
+var runSequence = require("run-sequence");
 
-gulp.task('dist', function (callback) {
+gulp.task("dist", function (callback) {
   runSequence(
-    'delete',
-    'copy',
-    'sass:compile',
-    [
-      'optimize:css',
-      'optimize:js',
-      'optimize:images'
-    ],
-    'zip',
-    'vrev',
-    callback
+    "delete",
+    "copy",
+    "sass:compile",
+    ["optimize:css", "optimize:js", "optimize:images"],
+    "zip",
+    "vrev",
+    callback,
   );
 });
 ```
@@ -138,19 +119,19 @@ Here are those individual task files:
 ```js
 // browsersync.js
 
-var gulp = require('gulp');
-var browserSync = require('browser-sync').create();
-var proxy = 'johnathan-org-staging:80';
+var gulp = require("gulp");
+var browserSync = require("browser-sync").create();
+var proxy = "johnathan-org-staging:80";
 
-gulp.task('browsersync:production', function (callback) {
+gulp.task("browsersync:production", function (callback) {
   browserSync.init({
-    proxy: proxy
+    proxy: proxy,
   });
 
   callback();
 });
 
-gulp.task('browsersync:reload', function (callback) {
+gulp.task("browsersync:reload", function (callback) {
   browserSync.reload();
   callback();
 });
@@ -158,34 +139,36 @@ gulp.task('browsersync:reload', function (callback) {
 
 ```js
 // copy.js
-var gulp = require('gulp');
-var files = ['app/**/*.php',
-  'app/*.txt',
-  'app/screenshot.png',
-  'app/browserconfig.xml',
-  'app/assets/css/**/*',
-  'app/assets/fonts/**/*',
-  'app/style.css',
-  'app/assets/js/*',
-  'app/assets/images/*',
-  'app/assets/svg/*'
+var gulp = require("gulp");
+var files = [
+  "app/**/*.php",
+  "app/*.txt",
+  "app/screenshot.png",
+  "app/browserconfig.xml",
+  "app/assets/css/**/*",
+  "app/assets/fonts/**/*",
+  "app/style.css",
+  "app/assets/js/*",
+  "app/assets/images/*",
+  "app/assets/svg/*",
 ];
-var base = './app';
-var prodDest = './johnathan-org';
-var devDest = '/Users/jlyman/Local Sites/johnathanorg-staging/app/public/wp-content/themes/johnathan-org';
+var base = "./app";
+var prodDest = "./johnathan-org";
+var devDest =
+  "/Users/jlyman/Local Sites/johnathanorg-staging/app/public/wp-content/themes/johnathan-org";
 
-gulp.task('copy', () => {
+gulp.task("copy", () => {
   return gulp
     .src(files, {
-      base: base
+      base: base,
     })
     .pipe(gulp.dest(prodDest));
 });
 
-gulp.task('copy:dev', () => {
+gulp.task("copy:dev", () => {
   return gulp
     .src(files, {
-      base: base
+      base: base,
     })
     .pipe(gulp.dest(devDest));
 });
@@ -193,81 +176,87 @@ gulp.task('copy:dev', () => {
 
 ```js
 // delete.js
-var gulp = require('gulp');
-var del = require('del');
+var gulp = require("gulp");
+var del = require("del");
 
-gulp.task('delete', () => {
-  del.sync('johnathan-org');
+gulp.task("delete", () => {
+  del.sync("johnathan-org");
 });
 ```
 
 ```js
 // gzip.js
-var gulp = require('gulp');
-var gzip = require('gulp-gzip');
+var gulp = require("gulp");
+var gzip = require("gulp-gzip");
 
-gulp.task('gzip', () => {
+gulp.task("gzip", () => {
   return gulp
-    .src('johnathan-org/assets/**/*.{css,js}')
+    .src("johnathan-org/assets/**/*.{css,js}")
     .pipe(gzip())
-    .pipe(gulp.dest('johnathan-org/assets'));
+    .pipe(gulp.dest("johnathan-org/assets"));
 });
 ```
 
 ```js
 // optimize.js
-var gulp = require('gulp');
-var cssnano = require('gulp-cssnano');
-var imagemin = require('gulp-imagemin');
-var uglify = require('gulp-uglify');
-var size = require('gulp-size');
+var gulp = require("gulp");
+var cssnano = require("gulp-cssnano");
+var imagemin = require("gulp-imagemin");
+var uglify = require("gulp-uglify");
+var size = require("gulp-size");
 
-gulp.task('optimize:css', () => {
+gulp.task("optimize:css", () => {
   return gulp
-    .src('dist/assets/css/**/*.css')
+    .src("dist/assets/css/**/*.css")
     .pipe(cssnano())
-    .pipe(gulp.dest('johnathan-org/assets/css'))
-    .pipe(size({
-      showFiles: true
-    }));
+    .pipe(gulp.dest("johnathan-org/assets/css"))
+    .pipe(
+      size({
+        showFiles: true,
+      }),
+    );
 });
 
-gulp.task('optimize:images', () => {
+gulp.task("optimize:images", () => {
   return gulp
-    .src('app/assets/images/**/*.{jpg,jpeg,png,gif,svg}')
+    .src("app/assets/images/**/*.{jpg,jpeg,png,gif,svg}")
     .pipe(imagemin())
-    .pipe(gulp.dest('johnathan-org/assets/images'))
-    .pipe(size({
-      showFiles: true
-    }));
+    .pipe(gulp.dest("johnathan-org/assets/images"))
+    .pipe(
+      size({
+        showFiles: true,
+      }),
+    );
 });
 
-gulp.task('optimize:js', () => {
+gulp.task("optimize:js", () => {
   return gulp
-    .src('johnathan-org/assets/js/**/*.js')
+    .src("johnathan-org/assets/js/**/*.js")
     .pipe(uglify())
-    .pipe(gulp.dest('johnathan-org/assets/js'))
-    .pipe(size({
-      showFiles: true
-    }));
+    .pipe(gulp.dest("johnathan-org/assets/js"))
+    .pipe(
+      size({
+        showFiles: true,
+      }),
+    );
 });
 ```
 
 ```js
 // sass.js
-var gulp = require('gulp');
-var sass = require('gulp-sass');
-var sourcemaps = require('gulp-sourcemaps');
-var clean = require('gulp-clean');
-var runSequence = require('run-sequence');
+var gulp = require("gulp");
+var sass = require("gulp-sass");
+var sourcemaps = require("gulp-sourcemaps");
+var clean = require("gulp-clean");
+var runSequence = require("run-sequence");
 
-gulp.task('sass:compile', () => {
+gulp.task("sass:compile", () => {
   return gulp
-    .src('app/assets/scss/**/*.scss')
+    .src("app/assets/scss/**/*.scss")
     .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(gulp.dest('app/assets/css'));
+    .pipe(sass().on("error", sass.logError))
+    .pipe(sourcemaps.write("./maps"))
+    .pipe(gulp.dest("app/assets/css"));
 });
 ```
 
@@ -275,32 +264,32 @@ I created `vrev` to be able to use `wp_enqueue_*` and be able to cite version nu
 
 ```js
 // version-rev.js
-var gulp = require('gulp');
-var replace = require('gulp-replace');
-var fs = require('fs');
-var pJson = JSON.parse(fs.readFileSync('./package.json'));
-var fnFile = 'johnathan-org/functions.php';
+var gulp = require("gulp");
+var replace = require("gulp-replace");
+var fs = require("fs");
+var pJson = JSON.parse(fs.readFileSync("./package.json"));
+var fnFile = "johnathan-org/functions.php";
 var vString = "'" + pJson.version + "'";
 
-gulp.task('vrev', () => {
+gulp.task("vrev", () => {
   return gulp
     .src(fnFile)
-    .pipe(replace('rand(100000,999999)', vString))
-    .pipe(gulp.dest('johnathan-org'));
+    .pipe(replace("rand(100000,999999)", vString))
+    .pipe(gulp.dest("johnathan-org"));
 });
 ```
 
 ```js
 // zip.js
-var gulp = require('gulp');
-var zip = require('gulp-zip');
-var size = require('gulp-size');
+var gulp = require("gulp");
+var zip = require("gulp-zip");
+var size = require("gulp-size");
 
-gulp.task('zip', () => {
+gulp.task("zip", () => {
   return gulp
-    .src('johnathan-org/**/*')
-    .pipe(zip('johnathan-org.zip'))
-    .pipe(gulp.dest('./'))
+    .src("johnathan-org/**/*")
+    .pipe(zip("johnathan-org.zip"))
+    .pipe(gulp.dest("./"))
     .pipe(size());
 });
 ```
@@ -308,4 +297,3 @@ gulp.task('zip', () => {
 And that's about it!
 
 The biggest thing I took away from this whole process was how quickly I can make changes now and be able to iterate on previous work without a huge amount of burden or overhead.
-

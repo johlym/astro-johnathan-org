@@ -14,11 +14,10 @@ Anyway, This article had some good points that I wanted to recap because it's so
 
 Looking back on even last night's sleep, I started out on my side, and the article puts me in the majority with 57% of sleepers starting out that way. Sometimes, if I'm already pretty relaxed, I'll start on my back, and let my eyes literally roll back into my head (weird I know). That's something only 17% of people seem to do, and for those stomach sleepers out there, you're the odder of the bunch at 11% for starting positions.
 
-{% cloudinary_img, "2680866397_f6107a9fe0_o", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/2680866397_f6107a9fe0_o">
 
 What I really found interesting is just in the next paragraph, the author talks about the variance in the amount of times people toss and turn during the night: as few as three times to as many as 36. I would have no way of knowing where I fall in that category unless I videotaped myself. I'm ok not knowing that much about my sleeping habits.
 
 I whole-heartedly believe it's important to make sure I am sleeping “properly” or as close to it as I can. I try to avoid pain areas in the sense that I'll sleep on the opposite side if I'm favoring an area or if my back hurts, I'll try to lay as flat as I can, to keep as much tension and pressure off it as possible.
 
 If you have time—if you don't, I think you should make time—go read the article form the Wall Street Journal. Sleep is important and making sure you're getting the most out of it is crucial to morning success. Not all of us can just spring out of bed before the birds.
-

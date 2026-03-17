@@ -16,7 +16,7 @@ I'll just come right out and say it: this place is dry. Not dry like “my cloth
 
 See exhibit A.
 
-{% cloudinary_img, "361745-5", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/361745-5">
 
 That about sums it up.
 
@@ -30,7 +30,4 @@ I don't feel I've given California enough credit. The ocean is damn awesome and 
 
 Maybe this guy:
 
-
-
 Oh well.
-

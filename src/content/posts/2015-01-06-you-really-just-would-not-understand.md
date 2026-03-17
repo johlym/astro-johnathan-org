@@ -8,7 +8,7 @@ last_modified_at: 2022-02-28T22:57:35.599Z
 category: journal
 ---
 
-{% cloudinary_img, "Screenshot-2015-01-06-20.14.21", "standard" %}
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/Screenshot-2015-01-06-20.14.21">
 
 I'm hoping that someone can explain to me why in the literal hell I would think this is something I would wear.
 
@@ -19,4 +19,3 @@ Are you sure? At what point did I become such a pompous @$$ that everything I do
 At least they spelled my name right… spammers have a tendency to misspell my name at least a dozen times a day, according to my spam filter. Perhaps it's time to make a new rule to filter out those who just don't understand: If you email me, tweet me, or otherwise try to talk to me and you don't spell my name right, I'm going to wear this god-forsaken sweatshirt, take a photo, send it to you, tell you go pound sand, and then run away laughing.
 
 That sounds crazy, right? Well it's a Johnathan thing… you wouldn't understand.
-
