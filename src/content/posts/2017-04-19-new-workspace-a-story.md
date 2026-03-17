@@ -40,7 +40,7 @@ This configuration only lasted a couple months as we approach present day. I had
 
 When I got to a point where I'd be comfortable sharing it with the world, [I posted a picture](https://www.instagram.com/p/BTFw4hNlhlz/?taken-by=_lyman) (the same one you see in the header of this post) [on Instagram](https://www.instagram.com/p/BTFw4hNlhlz/?taken-by=_lyman). Turns out Instagram loves this stuff and ate it up. If I ever seriously wanted to increase my _Brand_, this would be how I'd do it. (lol)
 
-{% cloudinary_img "IMG_3632_jofipc", "IMG_3632_jofipc">
+<img src="https://res.cloudinary.com/johnathan-org/image/upload/w_640,c_fill,q_90,dpr_2.0/IMG_3632_jofipc">
 
 ### The Pieces
 
