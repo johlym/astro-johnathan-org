@@ -8,6 +8,12 @@ export default defineConfig({
   adapter: node({
     mode: 'standalone',
   }),
+  markdown: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+    gfm: true,
+    smartypants: true,
+  },
   vite: {
     plugins: [tailwindcss()],
   },
