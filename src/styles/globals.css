@@ -32,11 +32,16 @@
   }
 
   pre {
-    @apply overflow-x-auto bg-neutral-900 p-4 text-sm text-neutral-100;
+    @apply overflow-x-auto bg-neutral-950 p-4 text-sm;
+  }
+
+  pre.astro-code {
+    @apply border border-neutral-800;
+    background-color: rgb(23 23 23) !important; /* neutral-900 */
   }
 
   code:not(pre code) {
-    @apply bg-neutral-900 px-1.5 py-0.5 text-sm font-body;
+    @apply bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 text-sm font-body;
   }
 
   blockquote {
