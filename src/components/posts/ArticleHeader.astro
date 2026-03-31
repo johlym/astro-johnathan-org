@@ -68,11 +68,11 @@ const dateStr = date
         </div>
       )}
 
-      <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading leading-tight mb-6">{title}</h1>
-
       {excerpt && (
-        <p class="text-neutral-400 text-base leading-relaxed mb-10">{excerpt}</p>
+        <p class="text-neutral-400 text-base leading-relaxed uppercase">{excerpt}</p>
       )}
+
+      <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading leading-tight mb-10">{title}</h1>
 
       {showAuthorMeta && date && (
         <div class="flex items-center gap-4 py-6 border-t border-b border-neutral-800">
