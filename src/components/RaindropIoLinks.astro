@@ -2,7 +2,7 @@
 ---
 
 <div id="raindrop-links" aria-live="polite">
-  <p class="text-gray-500 dark:text-gray-400 animate-pulse">Loading links…</p>
+  <p class="text-neutral-400 animate-pulse">Loading links…</p>
 </div>
 
 <script>
@@ -31,14 +31,14 @@
       const sections: Section[] = await res.json()
 
       if (!sections.length) {
-        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No links available.</p>'
+        container.innerHTML = '<p class="text-neutral-400">No links available.</p>'
         return
       }
 
       const nav = sections
         .map(
           (s) =>
-            `<a href="#${slugify(s.title)}" class="text-accent dark:text-accent-light hover:underline">${esc(s.title)}</a>`,
+            `<a href="#${slugify(s.title)}" class="text-lime-400 hover:underline">${esc(s.title)}</a>`,
         )
         .join('')
 
@@ -49,13 +49,13 @@
               const tags = link.tags.length > 0 ? ` (${esc(link.tags.join(', '))})` : ''
               return `<li>
                 <a href="${esc(link.link)}" target="_blank" rel="noopener noreferrer"
-                  class="font-normal text-accent dark:text-accent-light hover:underline">${esc(link.title)}</a>
-                <div class="text-sm text-gray-600 dark:text-gray-400">${esc(link.domain)}${tags}</div>
+                  class="font-normal text-lime-400 hover:underline">${esc(link.title)}</a>
+                <div class="text-sm text-neutral-400">${esc(link.domain)}${tags}</div>
               </li>`
             })
             .join('')
           return `<section id="${slugify(section.title)}" class="mb-10">
-            <h2 class="text-xl font-bold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">${esc(section.title)}</h2>
+            <h2 class="text-xl font-bold mb-4 border-b border-neutral-800 pb-2">${esc(section.title)}</h2>
             <ul class="space-y-4">${items}</ul>
           </section>`
         })
@@ -68,7 +68,7 @@
     } catch (err) {
       console.error('[RaindropIoLinks]', err)
       const c = document.getElementById('raindrop-links')
-      if (c) c.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Failed to load links.</p>'
+      if (c) c.innerHTML = '<p class="text-neutral-400">Failed to load links.</p>'
     }
   }
 
