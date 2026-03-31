@@ -25,6 +25,8 @@ const {
   wordCount,
 } = Astro.props
 
+const authorNameDisplay = authorName || 'Johnathan Lyman'
+
 const allTags = [...tags, ...(category ? [category] : [])]
 
 const ordinalSuffixes: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' }
@@ -77,7 +79,7 @@ const dateStr = date
             <div class="flex items-center gap-6">
               <div>
                 <p class="text-neutral-600 text-xs mb-0.5">guy who wrote this</p>
-                <p class="text-neutral-100 text-xs font-heading lowercase">johnathan lyman</p>
+                <p class="text-neutral-100 text-xs font-heading lowercase">{authorNameDisplay}</p>
               </div>
             </div>
 
