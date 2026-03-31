@@ -4,7 +4,8 @@ export const prerender = false
 import Layout from '../layouts/Layout.astro'
 import ArticleHeader from '../components/posts/ArticleHeader.astro'
 import RichText from '../components/RichText.astro'
-import { getPage } from '../lib/payload'
+import { getPage, getPost } from '../lib/payload'
+import { getMdPosts } from '../lib/mdposts'
 
 const { slug } = Astro.params
 
@@ -18,7 +19,30 @@ try {
   page = null
 }
 
-if (!page) return Astro.redirect('/404')
+// If no page found, check if it's a blog post
+if (!page) {
+  // Check legacy markdown posts
+  const mdPosts = await getMdPosts()
+  const mdPost = mdPosts.find((e) => e.slug === slug)
+  
+  if (mdPost) {
+    return Astro.redirect(`/blog/${slug}`)
+  }
+  
+  // Check Payload posts
+  try {
+    const result = await getPost(slug)
+    const post = result.docs[0] ?? null
+    if (post) {
+      return Astro.redirect(`/blog/${slug}`)
+    }
+  } catch {
+    // Not a post either
+  }
+  
+  // Not a page or post, show 404
+  return Astro.redirect('/404')
+}
 ---
 
 <Layout title={page.title} description={page.excerpt}>
