@@ -62,7 +62,7 @@ if (mdEntry) {
   dateObj = new Date(post.createdAt)
   excerpt = post.excerpt
   bodyHtml = lexicalToHtml(post.body)
-  const rawHeadings = post.showTableOfContents ? extractHeadings(post.body) : []
+  const rawHeadings = extractHeadings(post.body)
   tocItems = rawHeadings.map((h) => ({ id: h.id, text: h.text, tag: h.tag }))
   showToc = tocItems.length > 0
   authorName =
