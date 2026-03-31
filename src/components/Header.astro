@@ -17,7 +17,7 @@ const { siteTitle, navLinks = [] } = Astro.props
       <div class="w-8 h-8 bg-lime-400 flex items-center justify-center">
         <span class="text-neutral-950 text-xs font-bold leading-none">J.<br />ORG</span>
       </div>
-      <span class="text-neutral-100 text-sm tracking-tight font-heading">{siteTitle}</span>
+      <span class="text-neutral-100 text-sm tracking-tight font-heading lowercase">{siteTitle}</span>
     </a>
     <div class="flex items-center gap-8">
       {navLinks.map((link) => (
