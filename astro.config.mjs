@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://johnathan.org',
-  output: 'static',
+  output: 'server',
   adapter: node({
     mode: 'standalone',
   }),
