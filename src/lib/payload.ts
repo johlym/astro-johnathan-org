@@ -95,7 +95,7 @@ export function getPosts(page = 1, limit = 10) {
 
 export function getPost(slug: string) {
   return apiFetch<PaginatedResponse<Post>>(
-    `/api/posts?where[slug][equals]=${encodeURIComponent(slug)}&depth=2&limit=1`,
+    `/api/posts?where[slug][equals]=${encodeURIComponent(slug)}&depth=2&draft=false&limit=1`,
   );
 }
 
