@@ -83,10 +83,6 @@ if (mdEntry) {
       : ''
 }
 
-const dateStr = dateObj
-  ? dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-  : ''
-const dateIso = dateObj?.toISOString() ?? ''
 const metaCategory = category ?? categoryTitle
 const rawText = mdEntry
   ? (mdEntry.body ?? '').replace(/[#*`[\]()>_~|!]+/g, ' ')
