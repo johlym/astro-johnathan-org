@@ -1,6 +1,4 @@
 ---
-export const prerender = false
-
 import Layout from '../layouts/Layout.astro'
 import Content from '../components/Content.astro'
 import ArticleHeader from '../components/posts/ArticleHeader.astro'
@@ -8,15 +6,15 @@ import RichText from '../components/RichText.astro'
 import { getPage } from '../lib/payload'
 import RaindropIoLinks from '../components/RaindropIoLinks.astro'
 
-let page
-try {
-  const result = await getPage('links')
-  page = result.docs[0] ?? null
-} catch {
-  page = null
-}
+const result = await getPage('links')
+const page = result.docs[0]
 
-if (!page) return Astro.redirect('/404')
+// If the CMS doesn't have a `links` page at build time, we can't
+// prerender this route. Throwing here fails the build so the omission
+// is visible instead of shipping a 404 to visitors.
+if (!page) {
+  throw new Error('Missing Payload page with slug "links" — required for /links/')
+}
 ---
 
 <Layout title={page.title} description={page.excerpt}>

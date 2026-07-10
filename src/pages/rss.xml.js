@@ -2,8 +2,6 @@ import rss from '@astrojs/rss';
 import { getMdPosts } from '../lib/mdposts';
 import { getPosts } from '../lib/payload';
 
-export const prerender = false;
-
 export async function GET(context) {
   const [payloadResult, mdPosts] = await Promise.all([
     getPosts(1, 1000).catch(() => ({ docs: [] })),

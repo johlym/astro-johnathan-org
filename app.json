@@ -1,8 +1,0 @@
-{
-  "name": "astro-johnathan-org",
-  "buildpacks": [
-    {
-      "url": "heroku/nodejs"
-    }
-  ]
-}

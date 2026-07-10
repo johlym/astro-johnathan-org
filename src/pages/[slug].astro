@@ -1,48 +1,24 @@
 ---
-export const prerender = false
-
 import Layout from '../layouts/Layout.astro'
 import ArticleHeader from '../components/posts/ArticleHeader.astro'
 import RichText from '../components/RichText.astro'
-import { getPage, getPost } from '../lib/payload'
-import { getMdPosts } from '../lib/mdposts'
+import { getAllPageSlugs, getPage, type Page } from '../lib/payload'
 
-const { slug } = Astro.params
+type Props = { page: Page }
 
-if (!slug) return Astro.redirect('/')
-
-let page
-try {
-  const result = await getPage(slug)
-  page = result.docs[0] ?? null
-} catch {
-  page = null
+export async function getStaticPaths() {
+  const resp = await getAllPageSlugs()
+  const paths: Array<{ params: { slug: string }; props: Props }> = []
+  for (const s of resp.docs) {
+    const full = await getPage(s.slug)
+    const page = full.docs[0]
+    if (!page) continue
+    paths.push({ params: { slug: s.slug }, props: { page } })
+  }
+  return paths
 }
 
-// If no page found, check if it's a blog post
-if (!page) {
-  // Check legacy markdown posts
-  const mdPosts = await getMdPosts()
-  const mdPost = mdPosts.find((e) => e.slug === slug)
-  
-  if (mdPost) {
-    return Astro.redirect(`/blog/${slug}`)
-  }
-  
-  // Check Payload posts
-  try {
-    const result = await getPost(slug)
-    const post = result.docs[0] ?? null
-    if (post) {
-      return Astro.redirect(`/blog/${slug}`)
-    }
-  } catch {
-    // Not a post either
-  }
-  
-  // Not a page or post, show 404
-  return Astro.redirect('/404')
-}
+const { page } = Astro.props as Props
 ---
 
 <Layout title={page.title} description={page.excerpt}>

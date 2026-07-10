@@ -1,23 +1,54 @@
 ---
-export const prerender = false
-
 import Layout from '../../layouts/Layout.astro'
 import Content from '../../components/Content.astro'
 import ArticleHeader from '../../components/posts/ArticleHeader.astro'
 import TableOfContents from '../../components/posts/TableOfContents.astro'
 import FeaturedImage from '../../components/posts/FeaturedImage.astro'
 
-import { getPost } from '../../lib/payload'
+import { getAllPostSlugs, getPost, type Post } from '../../lib/payload'
 import { lexicalToHtml, extractHeadings, processFootnotes } from '../../lib/richtext'
 import { render } from 'astro:content'
-import { getMdPosts } from '../../lib/mdposts'
+import { getMdPosts, type MdPost } from '../../lib/mdposts'
 
-const { slug } = Astro.params
-if (!slug) return Astro.redirect('/blog')
+type Props = {
+  source: 'md'
+  mdEntry: MdPost
+} | {
+  source: 'cms'
+  post: Post
+}
 
-// ── 1. Check legacy Markdown collection ──────────────────────────────────────
-const mdPosts = await getMdPosts()
-const mdEntry = mdPosts.find((e) => e.slug === slug) ?? null
+export async function getStaticPaths() {
+  const [mdPosts, cmsResp] = await Promise.all([
+    getMdPosts(),
+    getAllPostSlugs(),
+  ])
+
+  const mdSlugs = new Set(mdPosts.map((e) => e.slug))
+  const paths: Array<{ params: { slug: string }; props: Props }> = []
+
+  for (const mdEntry of mdPosts) {
+    paths.push({
+      params: { slug: mdEntry.slug },
+      props: { source: 'md', mdEntry },
+    })
+  }
+
+  for (const cms of cmsResp.docs) {
+    if (mdSlugs.has(cms.slug)) continue
+    const full = await getPost(cms.slug)
+    const post = full.docs[0]
+    if (!post) continue
+    paths.push({
+      params: { slug: cms.slug },
+      props: { source: 'cms', post },
+    })
+  }
+
+  return paths
+}
+
+const props = Astro.props as Props
 
 type TocItem = { id: string; text: string; depth?: number; tag?: string }
 
@@ -27,37 +58,27 @@ let excerpt: string | undefined
 let category: string | undefined
 let tocItems: TocItem[] = []
 let showToc = false
-// MD-only
 let MdContent: ((_props: Record<string, unknown>) => unknown) | null = null
-// CMS-only
 let bodyHtml = ''
 let authorName: string | null = null
 let categoryTitle: string | null = null
 let featuredImageUrl: string | null = null
 let featuredImageAlt = ''
 
-if (mdEntry) {
+if (props.source === 'md') {
+  const { mdEntry } = props
   const { Content, headings } = await render(mdEntry)
   title = mdEntry.data.title
   dateObj = mdEntry.data.date
   excerpt = mdEntry.data.excerpt ?? mdEntry.data.description
   category = mdEntry.data.category
-  MdContent = Content as ((_props: Record<string, unknown>) => unknown)
+  MdContent = Content as (_props: Record<string, unknown>) => unknown
   tocItems = headings
     .filter((h) => h.depth <= 3)
     .map((h) => ({ id: h.slug, text: h.text, depth: h.depth }))
   showToc = tocItems.length > 0
 } else {
-  // ── 2. Fall back to Payload REST API ───────────────────────────────────────
-  let post = null
-  try {
-    const result = await getPost(slug)
-    post = result.docs[0] ?? null
-  } catch {
-    // not found
-  }
-  if (!post) return Astro.redirect('/404')
-
+  const { post } = props
   title = post.title
   dateObj = new Date(post.createdAt)
   excerpt = post.excerpt
@@ -84,8 +105,8 @@ if (mdEntry) {
 }
 
 const metaCategory = category ?? categoryTitle
-const rawText = mdEntry
-  ? (mdEntry.body ?? '').replace(/[#*`[\]()>_~|!]+/g, ' ')
+const rawText = props.source === 'md'
+  ? (props.mdEntry.body ?? '').replace(/[#*`[\]()>_~|!]+/g, ' ')
   : bodyHtml.replace(/<[^>]+>/g, ' ')
 const wordCount = rawText.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length.toLocaleString('en-US')
 ---

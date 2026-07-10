@@ -2,8 +2,6 @@ import type { APIContext } from 'astro'
 import { getPosts, getAllPageSlugs } from '../lib/payload'
 import { getMdPosts } from '../lib/mdposts'
 
-export const prerender = false
-
 export async function GET(context: APIContext) {
   const site = context.site?.origin ?? 'https://johnathan.org'
 

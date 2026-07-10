@@ -1,18 +1,18 @@
 import { defineConfig } from 'astro/config'
-import node from '@astrojs/node'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://johnathan.org',
-  output: 'server',
-  adapter: node({
-    mode: 'standalone',
-  }),
+  output: 'static',
+  trailingSlash: 'ignore',
   markdown: {
     remarkPlugins: [],
     rehypePlugins: [],
     gfm: true,
     smartypants: true,
+  },
+  build: {
+    format: 'directory',
   },
   vite: {
     plugins: [tailwindcss()],
