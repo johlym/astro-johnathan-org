@@ -1,19 +1,20 @@
 ---
+export const prerender = false
+
 import Layout from '../layouts/Layout.astro'
 import Content from '../components/Content.astro'
 import ArticleHeader from '../components/posts/ArticleHeader.astro'
 import RichText from '../components/RichText.astro'
-import { getPage } from '../lib/payload'
+import { getPage } from '../lib/content'
 import RaindropIoLinks from '../components/RaindropIoLinks.astro'
 
-const result = await getPage('links')
-const page = result.docs[0]
+const page = await getPage('links').catch(() => null)
 
-// If the CMS doesn't have a `links` page at build time, we can't
-// prerender this route. Throwing here fails the build so the omission
-// is visible instead of shipping a 404 to visitors.
 if (!page) {
-  throw new Error('Missing Payload page with slug "links" — required for /links/')
+  return new Response(
+    'Missing EmDash page with slug "links" — create and publish it in /_emdash/admin.',
+    { status: 503, statusText: 'Service Unavailable' },
+  )
 }
 ---
 

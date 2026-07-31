@@ -1,0 +1,173 @@
+{
+  "$schema": "https://emdashcms.com/seed.schema.json",
+  "version": "1",
+  "meta": {
+    "name": "johnathan.org",
+    "description": "Personal site content model migrated from Payload CMS",
+    "author": "Johnathan Lyman"
+  },
+  "settings": {
+    "title": "Johnathan.org",
+    "tagline": "An Internet property by Johnathan Lyman"
+  },
+  "collections": [
+    {
+      "slug": "posts",
+      "label": "Posts",
+      "labelSingular": "Post",
+      "description": "Blog posts",
+      "icon": "file-text",
+      "supports": ["drafts", "revisions", "preview", "search", "seo"],
+      "urlPattern": "/blog/{slug}",
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "excerpt",
+          "label": "Excerpt",
+          "type": "text"
+        },
+        {
+          "slug": "body",
+          "label": "Body",
+          "type": "portableText",
+          "required": true
+        },
+        {
+          "slug": "featured_image",
+          "label": "Featured Image",
+          "type": "image"
+        },
+        {
+          "slug": "show_table_of_contents",
+          "label": "Show Table of Contents",
+          "type": "boolean",
+          "defaultValue": false
+        }
+      ]
+    },
+    {
+      "slug": "pages",
+      "label": "Pages",
+      "labelSingular": "Page",
+      "description": "Static pages",
+      "icon": "file",
+      "supports": ["drafts", "revisions", "preview", "search", "seo"],
+      "urlPattern": "/{slug}",
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "excerpt",
+          "label": "Excerpt",
+          "type": "text"
+        },
+        {
+          "slug": "body",
+          "label": "Body",
+          "type": "portableText",
+          "required": true
+        }
+      ]
+    },
+    {
+      "slug": "work_experience",
+      "label": "Work Experience",
+      "labelSingular": "Work Experience",
+      "description": "Resume work history entries",
+      "icon": "briefcase",
+      "supports": ["drafts"],
+      "fields": [
+        {
+          "slug": "where",
+          "label": "Organization",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "from",
+          "label": "From",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "slug": "to",
+          "label": "To",
+          "type": "datetime"
+        },
+        {
+          "slug": "current",
+          "label": "Current role",
+          "type": "boolean",
+          "defaultValue": false
+        },
+        {
+          "slug": "details",
+          "label": "Details",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "slug": "certifications",
+      "label": "Certifications",
+      "labelSingular": "Certification",
+      "description": "Professional certifications",
+      "icon": "award",
+      "supports": ["drafts"],
+      "fields": [
+        {
+          "slug": "name",
+          "label": "Name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "issuing_body",
+          "label": "Issuing Body",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "issued",
+          "label": "Issued",
+          "type": "datetime"
+        }
+      ]
+    }
+  ],
+  "taxonomies": [
+    {
+      "name": "category",
+      "label": "Categories",
+      "labelSingular": "Category",
+      "hierarchical": true,
+      "collections": ["posts"]
+    }
+  ],
+  "menus": [
+    {
+      "name": "primary",
+      "label": "Primary Navigation",
+      "items": [
+        { "type": "custom", "label": "Home", "url": "/" },
+        { "type": "custom", "label": "Blog", "url": "/blog" },
+        { "type": "custom", "label": "Links", "url": "/links" }
+      ]
+    }
+  ]
+}

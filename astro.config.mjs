@@ -1,20 +1,43 @@
 import { defineConfig } from 'astro/config'
+import cloudflare from '@astrojs/cloudflare'
+import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
+import emdash, { local } from 'emdash/astro'
+import { sqlite } from 'emdash/db'
+import { d1, r2 } from '@emdash-cms/cloudflare'
+
+// Use D1/R2 in production builds; local SQLite + filesystem for `astro dev`.
+const useCloudflareBindings =
+  process.env.EMDASH_CLOUDFLARE === '1' || process.argv.includes('build')
 
 export default defineConfig({
   site: 'https://johnathan.org',
-  output: 'static',
+  output: 'server',
+  adapter: cloudflare({
+    prerenderEnvironment: 'node',
+  }),
   trailingSlash: 'ignore',
-  markdown: {
-    remarkPlugins: [],
-    rehypePlugins: [],
-    gfm: true,
-    smartypants: true,
-  },
   build: {
     format: 'directory',
   },
   vite: {
     plugins: [tailwindcss()],
   },
+  integrations: [
+    react(),
+    emdash({
+      database: useCloudflareBindings
+        ? d1({ binding: 'DB' })
+        : sqlite({ url: 'file:./data.db' }),
+      storage: useCloudflareBindings
+        ? r2({
+            binding: 'MEDIA',
+            publicUrl: process.env.PUBLIC_MEDIA_URL,
+          })
+        : local({
+            directory: './uploads',
+            baseUrl: '/_emdash/api/media/file',
+          }),
+    }),
+  ],
 })

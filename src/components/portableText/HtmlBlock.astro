@@ -1,0 +1,15 @@
+---
+/**
+ * Renders EmDash htmlBlock nodes. Needed for legacy MD/HTML embeds
+ * (Highcharts scripts, etc.) after Markdown import.
+ */
+interface Props {
+  node?: { html?: string }
+  value?: { html?: string }
+}
+
+const props = Astro.props
+const html = props.node?.html ?? props.value?.html ?? ''
+---
+
+{html && <div class="html-block" set:html={html} />}

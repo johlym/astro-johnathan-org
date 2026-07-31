@@ -1,30 +1,40 @@
 /**
  * Cloudflare Workers config for johnathan-org-frontend.
  *
- * This is an assets-only Worker — no `main` (no runtime code), just
- * static files from Astro's `dist/` served via the built-in assets
- * handler. Unmatched paths fall back to `dist/404.html`.
+ * EmDash + Astro SSR Worker with D1 (content) and R2 (media).
+ * Custom domains (johnathan.org, www.johnathan.org) are attached via
+ * the dashboard so DNS conflicts stay visible.
  *
- * `PAYLOAD_API_URL` is only used at build time (Astro reads it via
- * `import.meta.env`), so it doesn't need to be a secret. Set it as
- * a Build Variable in Workers Builds → Settings → Variables.
- *
- * Custom domains (johnathan.org, www.johnathan.org) are NOT declared
- * here on purpose. `wrangler deploy` cannot silently replace existing
- * DNS records that point elsewhere (returns 409) — attach them via
- * the dashboard so DNS conflicts are visible and resolvable.
- *
- * Docs: https://developers.cloudflare.com/workers/static-assets/
+ * Docs: https://docs.emdashcms.com/deployment/cloudflare/
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "johnathan-org-frontend",
-  "compatibility_date": "2026-07-01",
-  "assets": {
-    "directory": "./dist",
-    "not_found_handling": "404-page"
-  },
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-02-24",
+  "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "johnathan-org-emdash",
+      "database_id": "8656333c-aafb-4a71-9be2-c45fd43b92d9"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "johnathan-org-media"
+    }
+  ],
+  "worker_loaders": [
+    {
+      "binding": "LOADER"
+    }
+  ],
+  "triggers": {
+    "crons": ["* * * * *"]
   }
 }

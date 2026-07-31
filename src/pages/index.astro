@@ -1,9 +1,10 @@
 ---
+export const prerender = false
+
 import Layout from '../layouts/Layout.astro'
 import Hero from '../components/homepage/Hero.astro'
 import PostCard from '../components/homepage/PostCard.astro'
-import { getPosts } from '../lib/payload'
-import { getMdPosts } from '../lib/mdposts'
+import { getPosts } from '../lib/content'
 
 const LIMIT = 5
 
@@ -12,36 +13,16 @@ type RecentPost = { slug: string; title: string; date: Date; excerpt?: string; c
 let recentPosts: RecentPost[] = []
 
 try {
-  const { docs } = await getPosts(1, LIMIT)
-  recentPosts = docs.map((p) => ({
+  const posts = await getPosts(LIMIT)
+  recentPosts = posts.map((p) => ({
     slug: p.slug,
     title: p.title,
-    date: new Date(p.createdAt),
+    date: new Date(p.publishedAt ?? p.createdAt ?? Date.now()),
     excerpt: p.excerpt,
-    category:
-      p.category && typeof p.category === 'object' && 'title' in p.category
-        ? (p.category as { title: string }).title
-        : undefined,
+    category: p.category,
   }))
-} catch {
-  // Payload unavailable — will fill entirely from MD
-}
-
-if (recentPosts.length < LIMIT) {
-  try {
-    const mdPosts = await getMdPosts()
-    const needed = LIMIT - recentPosts.length
-    const mdFill = mdPosts.slice(0, needed).map((e) => ({
-      slug: e.slug,
-      title: e.data.title,
-      date: e.data.date,
-      excerpt: e.data.excerpt ?? e.data.description,
-      category: e.data.category,
-    }))
-    recentPosts = [...recentPosts, ...mdFill]
-  } catch {
-    // fallback
-  }
+} catch (err) {
+  console.error('[home] getPosts failed:', err)
 }
 ---
 

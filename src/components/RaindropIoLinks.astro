@@ -26,11 +26,11 @@
     if (!container) return
 
     try {
-      const base = (import.meta.env.PUBLIC_PAYLOAD_API_URL as string ?? '').replace(/\/$/, '')
-      const res = await fetch(`${base}/api/raindrop`)
+      const res = await fetch('/api/raindrop')
+      if (!res.ok) throw new Error(`Raindrop API HTTP ${res.status}`)
       const sections: Section[] = await res.json()
 
-      if (!sections.length) {
+      if (!Array.isArray(sections) || !sections.length) {
         container.innerHTML = '<p class="text-neutral-400">No links available.</p>'
         return
       }

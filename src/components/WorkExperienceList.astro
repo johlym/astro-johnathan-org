@@ -1,37 +1,40 @@
 ---
-import { getWorkExperience } from '../lib/payload'
+import { getWorkExperience } from '../lib/content'
 
 interface Props {
-  block: {
+  value?: {
     showAll?: boolean
-    selectedExperiences?: (number | { id: number })[]
+    selectedExperiences?: string[]
+  }
+  block?: {
+    showAll?: boolean
+    selectedExperiences?: (string | { id: string })[]
+  }
+  node?: {
+    showAll?: boolean
+    selectedExperiences?: string[]
   }
 }
 
-const { block } = Astro.props
+const props = Astro.props
+const block = props.value ?? props.node ?? props.block ?? { showAll: true }
 
 const formatDate = (iso: string) => {
   const d = new Date(iso)
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-let experiences: Awaited<ReturnType<typeof getWorkExperience>>['docs'] = []
+let experiences: Awaited<ReturnType<typeof getWorkExperience>> = []
 
 try {
-  if (block.showAll) {
-    const result = await getWorkExperience()
-    experiences = result.docs
-  } else {
-    const ids = (block.selectedExperiences || []).map((e) =>
-      typeof e === 'object' ? e.id : e,
+  const selected = block.selectedExperiences ?? []
+  if (selected.length > 0) {
+    const ids = selected.map((e) =>
+      typeof e === 'object' && e && 'id' in e ? String((e as { id: string }).id) : String(e),
     )
-    if (ids.length) {
-      const result = await getWorkExperience(ids)
-      const idOrder = new Map(ids.map((id, i) => [id, i]))
-      experiences = result.docs.sort(
-        (a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0),
-      )
-    }
+    experiences = await getWorkExperience(ids)
+  } else {
+    experiences = await getWorkExperience()
   }
 } catch {
   // fallback to empty

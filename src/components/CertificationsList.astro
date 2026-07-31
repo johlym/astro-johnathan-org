@@ -1,37 +1,39 @@
 ---
-import { getCertifications } from '../lib/payload'
+import { getCertifications } from '../lib/content'
 
 interface Props {
-  block: {
+  value?: {
     showAll?: boolean
-    selectedCertifications?: (number | { id: number })[]
+    selectedCertifications?: string[]
+  }
+  block?: {
+    showAll?: boolean
+    selectedCertifications?: (string | { id: string })[]
+  }
+  node?: {
+    showAll?: boolean
+    selectedCertifications?: string[]
   }
 }
 
-const { block } = Astro.props
+const props = Astro.props
+const block = props.value ?? props.node ?? props.block ?? {}
 
 const formatDate = (iso: string) => {
   const d = new Date(iso)
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-let certifications: Awaited<ReturnType<typeof getCertifications>>['docs'] = []
+let certifications: Awaited<ReturnType<typeof getCertifications>> = []
 
 try {
-  if (block.showAll) {
-    const result = await getCertifications()
-    certifications = result.docs
-  } else {
-    const ids = (block.selectedCertifications || []).map((e) =>
-      typeof e === 'object' ? e.id : e,
+  if (block.selectedCertifications?.length) {
+    const ids = block.selectedCertifications.map((e) =>
+      typeof e === 'object' && e && 'id' in e ? String((e as { id: string }).id) : String(e),
     )
-    if (ids.length) {
-      const result = await getCertifications(ids)
-      const idOrder = new Map(ids.map((id, i) => [id, i]))
-      certifications = result.docs.sort(
-        (a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0),
-      )
-    }
+    certifications = await getCertifications(ids)
+  } else if (block.showAll !== false) {
+    certifications = await getCertifications()
   }
 } catch {
   // fallback to empty

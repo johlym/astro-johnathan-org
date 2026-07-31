@@ -1,67 +1,15 @@
 ---
-import Layout from '../../layouts/Layout.astro'
-import { getPosts } from '../../lib/payload'
-import { getMdPosts } from '../../lib/mdposts'
+export const prerender = false
 
-// ── CMS posts (paged fetch up to a high limit; static build = one shot) ──────
-let cmsResult: Awaited<ReturnType<typeof getPosts>> = {
-  docs: [],
-  totalDocs: 0,
-  limit: 1000,
-  totalPages: 0,
-  page: 1,
-  hasPrevPage: false,
-  hasNextPage: false,
-  prevPage: null,
-  nextPage: null,
-}
+import Layout from '../../layouts/Layout.astro'
+import { getPosts } from '../../lib/content'
+
+let posts: Awaited<ReturnType<typeof getPosts>> = []
 try {
-  cmsResult = await getPosts(1, 1000)
+  posts = await getPosts(1000)
 } catch (err) {
   console.error('[blog] getPosts failed:', err)
 }
-
-// ── Legacy MD posts (compiled at build time — no network) ────────────────────
-let allMdPosts: Awaited<ReturnType<typeof getMdPosts>> = []
-try {
-  allMdPosts = await getMdPosts()
-} catch (err) {
-  console.error('[blog] getMdPosts failed:', err)
-}
-
-type UnifiedPost = {
-  slug: string
-  title: string
-  date: Date
-  excerpt?: string
-  category?: string
-  source: 'cms' | 'md'
-}
-
-const cmsEntries: UnifiedPost[] = cmsResult.docs.map((p) => ({
-  slug: p.slug,
-  title: p.title,
-  date: new Date(p.createdAt),
-  excerpt: p.excerpt,
-  category:
-    p.category && typeof p.category === 'object' && 'title' in p.category
-      ? (p.category as { title: string }).title
-      : undefined,
-  source: 'cms',
-}))
-
-const mdEntries: UnifiedPost[] = allMdPosts.map((e) => ({
-  slug: e.slug,
-  title: e.data.title,
-  date: e.data.date,
-  excerpt: e.data.excerpt ?? e.data.description,
-  category: e.data.category,
-  source: 'md',
-}))
-
-const allPosts = [...cmsEntries, ...mdEntries].sort(
-  (a, b) => b.date.getTime() - a.date.getTime(),
-)
 ---
 
 <Layout title="Blog">
@@ -74,34 +22,37 @@ const allPosts = [...cmsEntries, ...mdEntries].sort(
 
   <section class="w-full bg-neutral-950 py-12">
     <div class="max-w-3xl mx-auto px-6">
-      {allPosts.length > 0 ? (
-        allPosts.map((post, i) => (
-          <article class={`group py-8 border-b border-neutral-900 hover:border-neutral-700 transition-colors${i === allPosts.length - 1 ? ' border-b-0' : ''}`}>
-            <a href={`/blog/${post.slug}`} class="no-underline block">
-              <div class="flex items-start justify-between gap-8">
-                <div class="flex-1">
-                  <p class="text-neutral-600 text-xs mb-3 font-heading">
-                    {post.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                  <h2 class="text-neutral-100 text-lg mb-3 group-hover:text-lime-400 transition-colors font-heading">
-                    {post.title}
-                  </h2>
-                  {post.excerpt && (
-                    <p class="text-neutral-500 text-sm leading-relaxed">{post.excerpt}</p>
-                  )}
-                  {post.category && (
-                    <div class="flex items-center gap-3 mt-4">
-                      <span class="text-xs text-neutral-700 bg-neutral-900 px-2 py-1">{post.category}</span>
-                    </div>
-                  )}
+      {posts.length > 0 ? (
+        posts.map((post, i) => {
+          const date = new Date(post.publishedAt ?? post.createdAt ?? Date.now())
+          return (
+            <article class={`group py-8 border-b border-neutral-900 hover:border-neutral-700 transition-colors${i === posts.length - 1 ? ' border-b-0' : ''}`}>
+              <a href={`/blog/${post.slug}`} class="no-underline block">
+                <div class="flex items-start justify-between gap-8">
+                  <div class="flex-1">
+                    <p class="text-neutral-600 text-xs mb-3 font-heading">
+                      {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    <h2 class="text-neutral-100 text-lg mb-3 group-hover:text-lime-400 transition-colors font-heading">
+                      {post.title}
+                    </h2>
+                    {post.excerpt && (
+                      <p class="text-neutral-500 text-sm leading-relaxed">{post.excerpt}</p>
+                    )}
+                    {post.category && (
+                      <div class="flex items-center gap-3 mt-4">
+                        <span class="text-xs text-neutral-700 bg-neutral-900 px-2 py-1">{post.category}</span>
+                      </div>
+                    )}
+                  </div>
+                  <svg class="w-5 h-5 text-neutral-700 group-hover:text-lime-400 group-hover:translate-x-1 transition-all mt-6 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
+                  </svg>
                 </div>
-                <svg class="w-5 h-5 text-neutral-700 group-hover:text-lime-400 group-hover:translate-x-1 transition-all mt-6 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
-                </svg>
-              </div>
-            </a>
-          </article>
-        ))
+              </a>
+            </article>
+          )
+        })
       ) : (
         <p class="text-neutral-500 text-sm">No posts yet.</p>
       )}

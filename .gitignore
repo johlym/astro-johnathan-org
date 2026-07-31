@@ -4,3 +4,7 @@ node_modules/
 .DS_Store
 .astro/
 tmp/
+data.db
+data.db-*
+uploads/
+.wrangler/
