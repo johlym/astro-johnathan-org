@@ -5,9 +5,12 @@ import {
   getSiteSettings as getEmDashSiteSettings,
   getEntryTerms,
   getEntriesByTerm,
+  getTerm,
+  getTaxonomyTerms,
   getWidgetArea,
   search as emdashSearch,
   type EditProxy,
+  type TaxonomyTerm,
   type Widget,
   type WidgetArea,
 } from 'emdash'
@@ -163,10 +166,9 @@ export async function getPosts(limit = 100) {
   return sortPostsByDate(posts)
 }
 
-export async function getPaginatedPosts(page = 1, perPage = BLOG_PER_PAGE): Promise<PaginatedPosts> {
-  const all = await getPosts(1000)
+function paginatePosts(all: EmDashPost[], page = 1, perPage = BLOG_PER_PAGE): PaginatedPosts {
   const total = all.length
-  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  const totalPages = Math.max(1, Math.ceil(total / perPage) || 1)
   const safePage = Number.isFinite(page) && page >= 1 ? Math.min(Math.floor(page), totalPages) : 1
   const start = (safePage - 1) * perPage
   return {
@@ -176,6 +178,61 @@ export async function getPaginatedPosts(page = 1, perPage = BLOG_PER_PAGE): Prom
     total,
     perPage,
   }
+}
+
+export async function getPaginatedPosts(page = 1, perPage = BLOG_PER_PAGE): Promise<PaginatedPosts> {
+  return paginatePosts(await getPosts(1000), page, perPage)
+}
+
+export async function getPaginatedPostsByCategory(
+  categorySlug: string,
+  page = 1,
+  perPage = BLOG_PER_PAGE,
+): Promise<PaginatedPosts> {
+  const all = await getPosts(1000)
+  const filtered = all.filter((p) => p.categories.some((c) => c.slug === categorySlug))
+  return paginatePosts(filtered, page, perPage)
+}
+
+export async function getCategory(slug: string): Promise<TaxonomyTerm | null> {
+  try {
+    return await getTerm('category', slug)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Category terms with post counts derived from published posts.
+ * EmDash's includeCounts can return 0 when pivot/translation_group data is out of sync;
+ * counting via entry terms matches what the site actually lists.
+ */
+export async function getCategoryTermsWithCounts(includeCounts = true): Promise<TaxonomyTerm[]> {
+  let terms: TaxonomyTerm[] = []
+  try {
+    terms = await getTaxonomyTerms('category', { includeCounts: false })
+  } catch {
+    return []
+  }
+
+  if (!includeCounts) return terms
+
+  const posts = await getPosts(1000).catch(() => [] as EmDashPost[])
+  const bySlug = new Map<string, number>()
+  for (const post of posts) {
+    for (const cat of post.categories) {
+      bySlug.set(cat.slug, (bySlug.get(cat.slug) ?? 0) + 1)
+    }
+  }
+
+  const applyCounts = (items: TaxonomyTerm[]): TaxonomyTerm[] =>
+    items.map((term) => ({
+      ...term,
+      count: bySlug.get(term.slug) ?? 0,
+      children: applyCounts(term.children ?? []),
+    }))
+
+  return applyCounts(terms)
 }
 
 export async function getPost(slug: string) {

@@ -2,9 +2,17 @@
 export const prerender = false
 
 import Layout from '../../layouts/Layout.astro'
-import PostCard from '../../components/PostCard.astro'
-import Pagination from '../../components/Pagination.astro'
+import BlogArchive from '../../components/blog/BlogArchive.astro'
 import { getPaginatedPosts } from '../../lib/content'
+
+// Legacy query-param category links → /blog/$slug
+const legacyCategory = Astro.url.searchParams.get('category')
+if (legacyCategory) {
+  const params = new URLSearchParams(Astro.url.searchParams)
+  params.delete('category')
+  const qs = params.toString()
+  return Astro.redirect(`/blog/${encodeURIComponent(legacyCategory)}${qs ? `?${qs}` : ''}`, 301)
+}
 
 const rawPage = Number(Astro.url.searchParams.get('page') ?? '1')
 const requestedPage = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1
@@ -28,37 +36,5 @@ try {
 ---
 
 <Layout title="Blog">
-  <section class="w-full bg-neutral-950 py-16 border-b border-neutral-800">
-    <div class="max-w-[1200px] mx-auto px-6 flex flex-col gap-3">
-      <p class="text-lime-400 text-base sm:text-xs uppercase tracking-widest font-heading">Archive</p>
-      <h1 class="text-neutral-100 text-4xl font-heading text-pretty">Blog</h1>
-    </div>
-  </section>
-
-  <section class="w-full bg-neutral-950 py-12">
-    <div class="max-w-[1200px] mx-auto px-6 flex flex-col gap-12">
-      {posts.length > 0 ? (
-        <>
-          <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {posts.map((post) => (
-              <li class="min-w-0">
-                <PostCard
-                  post={{
-                    slug: post.slug,
-                    title: post.title,
-                    date: new Date(post.publishedAt ?? post.createdAt ?? Date.now()),
-                    excerpt: post.excerpt,
-                    featuredImage: post.featuredImage,
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
-          <Pagination page={page} totalPages={totalPages} />
-        </>
-      ) : (
-        <p class="text-neutral-500 text-base sm:text-sm">No posts yet.</p>
-      )}
-    </div>
-  </section>
+  <BlogArchive posts={posts} page={page} totalPages={totalPages} />
 </Layout>

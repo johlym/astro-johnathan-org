@@ -2,147 +2,215 @@
 export const prerender = false
 
 import Layout from '../../layouts/Layout.astro'
+import BlogArchive from '../../components/blog/BlogArchive.astro'
 import FeaturedImage from '../../components/posts/FeaturedImage.astro'
 import RichText from '../../components/RichText.astro'
 import WidgetRenderer from '../../components/WidgetRenderer.astro'
 import PostCard from '../../components/PostCard.astro'
 import {
+  getCategory,
+  getPaginatedPostsByCategory,
   getPost,
   getRelatedPosts,
   getSidebarWidgets,
   wordCountFromBody,
+  type EmDashPost,
 } from '../../lib/content'
+import type { TaxonomyTerm, Widget } from 'emdash'
 
 const slug = Astro.params.slug
 if (!slug) {
   return Astro.redirect('/404')
 }
 
+// Prefer an existing post so established /blog/$postSlug URLs keep working.
+// Otherwise treat the slug as a category archive (/blog/$category-slug).
 const post = await getPost(slug).catch(() => null)
+
+let mode: 'post' | 'category' = 'post'
+let category: TaxonomyTerm | null = null
+let archivePosts: EmDashPost[] = []
+let archivePage = 1
+let archiveTotalPages = 1
+let archiveBasePath = '/blog'
+
 if (!post) {
-  return new Response(null, { status: 404, statusText: 'Not Found' })
+  category = await getCategory(slug).catch(() => null)
+  if (!category) {
+    return new Response(null, { status: 404, statusText: 'Not Found' })
+  }
+
+  mode = 'category'
+  archiveBasePath = `/blog/${category.slug}`
+
+  const rawPage = Number(Astro.url.searchParams.get('page') ?? '1')
+  const requestedPage = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1
+
+  try {
+    const result = await getPaginatedPostsByCategory(category.slug, requestedPage)
+    archivePosts = result.posts
+    archivePage = result.page
+    archiveTotalPages = result.totalPages
+
+    if (requestedPage > archiveTotalPages && archiveTotalPages >= 1) {
+      return Astro.redirect(
+        archiveTotalPages === 1 ? archiveBasePath : `${archiveBasePath}?page=${archiveTotalPages}`,
+      )
+    }
+  } catch (err) {
+    console.error('[blog/category] getPaginatedPostsByCategory failed:', err)
+  }
 }
 
-const title = post.title
-const excerpt = post.excerpt
-const body = post.body
-const categories = post.categories
+const title = post?.title ?? ''
+const excerpt = post?.excerpt
+const body = post?.body
+const categories = post?.categories ?? []
 const primaryCategorySlug = categories[0]?.slug
-const featuredImageUrl = post.featuredImage?.url ?? null
-const featuredImageAlt = post.featuredImage?.alt ?? ''
-const wordCount = wordCountFromBody(post.body)
+const featuredImageUrl = post?.featuredImage?.url ?? null
+const featuredImageAlt = post?.featuredImage?.alt ?? ''
+const wordCount = post ? wordCountFromBody(post.body) : '0'
 const authorName = 'Johnathan Lyman'
+const edit = post?.edit
 
-const sidebarWidgets = await getSidebarWidgets()
-const related = await getRelatedPosts(primaryCategorySlug, post.id, 3)
+let sidebarWidgets: Widget[] = []
+let related: EmDashPost[] = []
+if (mode === 'post' && post) {
+  sidebarWidgets = await getSidebarWidgets()
+  related = await getRelatedPosts(primaryCategorySlug, post.id, 3)
+}
 
-const edit = post.edit
+const pageTitle =
+  mode === 'category' && category ? `${category.label} — Blog` : title
+const pageDescription =
+  mode === 'category' && category
+    ? `Posts filed under ${category.label}`
+    : excerpt
 ---
 
-<Layout title={title} description={excerpt}>
-  {post.isPreview && (
-    <div class="w-full bg-lime-400 text-neutral-950 text-center text-base sm:text-xs font-heading uppercase tracking-wide py-2">
-      Viewing preview. This content is not published.
-    </div>
-  )}
-
-  <article class="w-full bg-neutral-950" {...edit}>
-    <div class="max-w-[1200px] mx-auto px-6 py-12 flex flex-col gap-10">
-      <div>
-        <a
-          href="/blog"
-          class="inline-flex items-center gap-2 text-neutral-600 text-base sm:text-xs lowercase tracking-wide hover:text-lime-400 font-heading no-underline"
-        >
-          <svg class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19.5 12h-15m0 0l6.75 6.75M4.5 12l6.75-6.75"></path>
-          </svg>
-          Back to posts
-        </a>
+{mode === 'category' && category ? (
+  <Layout title={pageTitle} description={pageDescription}>
+    <BlogArchive
+      posts={archivePosts}
+      page={archivePage}
+      totalPages={archiveTotalPages}
+      basePath={archiveBasePath}
+      subtitle={category.label}
+    />
+  </Layout>
+) : (
+  <Layout title={pageTitle} description={pageDescription}>
+    {post?.isPreview && (
+      <div class="w-full bg-lime-400 text-neutral-950 text-center text-base sm:text-xs font-heading uppercase tracking-wide py-2">
+        Viewing preview. This content is not published.
       </div>
+    )}
 
-      <header class="flex flex-col gap-6">
-        <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading text-pretty" {...edit?.title}>
-          {title}
-        </h1>
-        {excerpt && (
-          <p class="text-neutral-400 text-base text-pretty uppercase" {...edit?.excerpt}>
-            {excerpt}
-          </p>
-        )}
-        <hr class="border-neutral-800 my-0" />
-      </header>
-
-      <div
-        class:list={[
-          'grid grid-cols-1 gap-10 lg:gap-8 items-start',
-          sidebarWidgets.length > 0
-            ? 'lg:grid-cols-[200px_minmax(0,1fr)_240px]'
-            : 'lg:grid-cols-[200px_minmax(0,1fr)]',
-        ]}
-      >
-        <aside class="flex flex-col gap-6 text-base sm:text-xs">
-          <div class="flex flex-col gap-1">
-            <p class="text-neutral-600">Author</p>
-            <p class="text-neutral-100 font-heading lowercase">{authorName}</p>
-          </div>
-
-          {categories.length > 0 && (
-            <div class="flex flex-col gap-2">
-              <p class="text-neutral-600">Filed under</p>
-              <ul role="list" class="flex flex-col gap-1">
-                {categories.map((cat) => (
-                  <li class="text-neutral-100 font-heading lowercase">{cat.label}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div class="flex flex-col gap-1">
-            <p class="text-neutral-600">Length</p>
-            <p class="text-neutral-100 font-heading lowercase tabular-nums">{wordCount} words</p>
-          </div>
-        </aside>
-
-        <div class="min-w-0 flex flex-col gap-10" {...edit?.body}>
-          {featuredImageUrl && (
-            <div {...edit?.featured_image}>
-              <FeaturedImage src={featuredImageUrl} alt={featuredImageAlt} />
-            </div>
-          )}
-          <RichText content={body} class="rich-text" />
+    <article class="w-full bg-neutral-950" {...edit}>
+      <div class="max-w-[1200px] mx-auto px-6 py-12 flex flex-col gap-10">
+        <div>
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-2 text-neutral-600 text-base sm:text-xs lowercase tracking-wide hover:text-lime-400 font-heading no-underline"
+          >
+            <svg class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19.5 12h-15m0 0l6.75 6.75M4.5 12l6.75-6.75"></path>
+            </svg>
+            Back to posts
+          </a>
         </div>
 
-        {sidebarWidgets.length > 0 && (
-          <aside class="flex flex-col gap-10 min-w-0">
-            {sidebarWidgets.map((widget) => (
-              <WidgetRenderer widget={widget} />
-            ))}
+        <header class="flex flex-col gap-6">
+          <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading text-pretty" {...edit?.title}>
+            {title}
+          </h1>
+          {excerpt && (
+            <p class="text-neutral-400 text-base text-pretty uppercase" {...edit?.excerpt}>
+              {excerpt}
+            </p>
+          )}
+          <hr class="border-neutral-800 my-0" />
+        </header>
+
+        <div
+          class:list={[
+            'grid grid-cols-1 gap-10 lg:gap-8 items-start',
+            sidebarWidgets.length > 0
+              ? 'lg:grid-cols-[200px_minmax(0,1fr)_240px]'
+              : 'lg:grid-cols-[200px_minmax(0,1fr)]',
+          ]}
+        >
+          <aside class="flex flex-col gap-6 text-base sm:text-xs">
+            <div class="flex flex-col gap-1">
+              <p class="text-neutral-600">Author</p>
+              <p class="text-neutral-100 font-heading lowercase">{authorName}</p>
+            </div>
+
+            {categories.length > 0 && (
+              <div class="flex flex-col gap-2">
+                <p class="text-neutral-600">Filed under</p>
+                <ul role="list" class="flex flex-col gap-1">
+                  {categories.map((cat) => (
+                    <li>
+                      <a
+                        href={`/blog/${encodeURIComponent(cat.slug)}`}
+                        class="text-neutral-100 font-heading lowercase hover:text-lime-400 no-underline"
+                      >
+                        {cat.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div class="flex flex-col gap-1">
+              <p class="text-neutral-600">Length</p>
+              <p class="text-neutral-100 font-heading lowercase tabular-nums">{wordCount} words</p>
+            </div>
           </aside>
+
+          <div class="min-w-0 flex flex-col gap-10" {...edit?.body}>
+            {featuredImageUrl && (
+              <div {...edit?.featured_image}>
+                <FeaturedImage src={featuredImageUrl} alt={featuredImageAlt} />
+              </div>
+            )}
+            <RichText content={body} class="rich-text" />
+          </div>
+
+          {sidebarWidgets.length > 0 && (
+            <aside class="flex flex-col gap-10 min-w-0">
+              {sidebarWidgets.map((widget) => (
+                <WidgetRenderer widget={widget} />
+              ))}
+            </aside>
+          )}
+        </div>
+
+        {related.length > 0 && (
+          <section class="flex flex-col gap-8 pt-8 border-t border-neutral-800">
+            <h2 class="text-neutral-100 text-base sm:text-xs font-heading uppercase tracking-widest text-balance">
+              Read this next
+            </h2>
+            <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+              {related.map((item) => (
+                <li class="min-w-0">
+                  <PostCard
+                    post={{
+                      slug: item.slug,
+                      title: item.title,
+                      date: new Date(item.publishedAt ?? item.createdAt ?? Date.now()),
+                      excerpt: item.excerpt,
+                      featuredImage: item.featuredImage,
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </div>
-
-      {related.length > 0 && (
-        <section class="flex flex-col gap-8 pt-8 border-t border-neutral-800">
-          <h2 class="text-neutral-100 text-base sm:text-xs font-heading uppercase tracking-widest text-balance">
-            Read this next
-          </h2>
-          <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {related.map((item) => (
-              <li class="min-w-0">
-                <PostCard
-                  post={{
-                    slug: item.slug,
-                    title: item.title,
-                    date: new Date(item.publishedAt ?? item.createdAt ?? Date.now()),
-                    excerpt: item.excerpt,
-                    featuredImage: item.featuredImage,
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </div>
-  </article>
-</Layout>
+    </article>
+  </Layout>
+)}
