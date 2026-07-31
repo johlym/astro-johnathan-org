@@ -1,19 +1,27 @@
 ---
-import { getTaxonomyTerms } from 'emdash'
+import { getTaxonomyTerms, type TaxonomyTerm } from 'emdash'
 
 interface Props {
-  showCount?: boolean
-  limit?: number
+  showCount?: boolean | string
+  limit?: number | string
 }
 
-const { showCount = false, limit = 30 } = Astro.props
+const { showCount: showCountProp = false, limit: limitProp = 20 } = Astro.props
 
-type Term = { label: string; slug: string; count?: number }
+function asBool(value: unknown, fallback: boolean) {
+  if (value === undefined || value === null) return fallback
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') return value === 'true' || value === '1'
+  return Boolean(value)
+}
 
-let terms: Term[] = []
+const showCount = asBool(showCountProp, false)
+const limit = Math.max(1, Number(limitProp) || 20)
+
+let terms: TaxonomyTerm[] = []
 try {
-  const result = await getTaxonomyTerms('tag')
-  terms = ((result ?? []) as Term[]).slice(0, limit)
+  const result = await getTaxonomyTerms('tag', { includeCounts: showCount })
+  terms = result.slice(0, limit)
 } catch {
   terms = []
 }
@@ -28,7 +36,7 @@ try {
           class="text-neutral-400 text-base sm:text-xs hover:text-lime-400 no-underline lowercase"
         >
           {term.label}
-          {showCount && term.count != null && (
+          {showCount && term.count !== undefined && (
             <span class="text-neutral-600 tabular-nums"> ({term.count})</span>
           )}
         </a>

@@ -61,14 +61,14 @@ const edit = post.edit
       </div>
 
       <header class="flex flex-col gap-6">
+        <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading text-pretty" {...edit?.title}>
+          {title}
+        </h1>
         {excerpt && (
           <p class="text-neutral-400 text-base text-pretty uppercase" {...edit?.excerpt}>
             {excerpt}
           </p>
         )}
-        <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading text-pretty" {...edit?.title}>
-          {title}
-        </h1>
         <hr class="border-neutral-800 my-0" />
       </header>
 
