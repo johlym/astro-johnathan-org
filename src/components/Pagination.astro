@@ -1,0 +1,44 @@
+---
+interface Props {
+  page: number
+  totalPages: number
+  basePath?: string
+}
+
+const { page, totalPages, basePath = '/blog' } = Astro.props
+
+function hrefFor(n: number) {
+  if (n <= 1) return basePath
+  return `${basePath}?page=${n}`
+}
+---
+
+{totalPages > 1 && (
+  <nav class="flex items-center justify-between gap-6 pt-12 border-t border-neutral-800" aria-label="Pagination">
+    {page > 1 ? (
+      <a
+        href={hrefFor(page - 1)}
+        class="text-neutral-400 text-base sm:text-xs font-heading lowercase tracking-wide hover:text-lime-400 no-underline"
+      >
+        ← Previous
+      </a>
+    ) : (
+      <span class="text-neutral-700 text-base sm:text-xs font-heading lowercase tracking-wide">← Previous</span>
+    )}
+
+    <p class="text-neutral-500 text-base sm:text-xs font-heading tabular-nums">
+      {page} / {totalPages}
+    </p>
+
+    {page < totalPages ? (
+      <a
+        href={hrefFor(page + 1)}
+        class="text-neutral-400 text-base sm:text-xs font-heading lowercase tracking-wide hover:text-lime-400 no-underline"
+      >
+        Next →
+      </a>
+    ) : (
+      <span class="text-neutral-700 text-base sm:text-xs font-heading lowercase tracking-wide">Next →</span>
+    )}
+  </nav>
+)}

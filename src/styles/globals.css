@@ -7,7 +7,7 @@
 
 @layer base {
   html {
-    @apply bg-neutral-950 text-neutral-100 antialiased;
+    @apply bg-neutral-950 text-neutral-100 antialiased scheme-only-dark;
   }
 
   body {

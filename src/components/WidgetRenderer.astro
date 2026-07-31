@@ -1,0 +1,66 @@
+---
+import { PortableText } from 'emdash/ui'
+import { getMenu, type Widget } from 'emdash'
+import RecentPosts from './widgets/RecentPosts.astro'
+import Categories from './widgets/Categories.astro'
+import TagCloud from './widgets/TagCloud.astro'
+import SearchForm from './widgets/SearchForm.astro'
+import Archives from './widgets/Archives.astro'
+
+interface Props {
+  widget: Widget
+}
+
+const { widget } = Astro.props
+
+const componentMap: Record<string, any> = {
+  'core:recent-posts': RecentPosts,
+  'core:categories': Categories,
+  'core:tags': TagCloud,
+  'core:search': SearchForm,
+  'core:archives': Archives,
+}
+
+const menu =
+  widget.type === 'menu' && widget.menuName ? await getMenu(widget.menuName).catch(() => null) : null
+
+const Component =
+  widget.type === 'component' && widget.componentId
+    ? componentMap[widget.componentId]
+    : null
+
+const componentProps = (widget.componentProps ?? {}) as Record<string, unknown>
+---
+
+<div class="flex flex-col gap-3">
+  {widget.title && (
+    <h3 class="text-neutral-100 text-base sm:text-xs font-heading uppercase tracking-wide text-balance">
+      {widget.title}
+    </h3>
+  )}
+
+  {widget.type === 'content' && widget.content && (
+    <div class="rich-text text-neutral-400">
+      <PortableText value={widget.content} />
+    </div>
+  )}
+
+  {widget.type === 'menu' && menu && menu.items.length > 0 && (
+    <nav>
+      <ul role="list" class="flex flex-col gap-2">
+        {menu.items.map((item) => (
+          <li>
+            <a
+              href={item.url || '/'}
+              class="text-neutral-300 text-base sm:text-sm hover:text-lime-400 no-underline lowercase"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
+  {Component && <Component {...componentProps} />}
+</div>

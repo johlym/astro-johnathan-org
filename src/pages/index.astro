@@ -3,14 +3,20 @@ export const prerender = false
 
 import Layout from '../layouts/Layout.astro'
 import Hero from '../components/homepage/Hero.astro'
-import PostCard from '../components/homepage/PostCard.astro'
+import PostCard from '../components/PostCard.astro'
 import { getPosts } from '../lib/content'
 
-const LIMIT = 5
+const LIMIT = 6
 
-type RecentPost = { slug: string; title: string; date: Date; excerpt?: string; category?: string }
+type CardPost = {
+  slug: string
+  title: string
+  date: Date
+  excerpt?: string
+  featuredImage?: { url?: string; alt?: string } | null
+}
 
-let recentPosts: RecentPost[] = []
+let recentPosts: CardPost[] = []
 
 try {
   const posts = await getPosts(LIMIT)
@@ -19,7 +25,7 @@ try {
     title: p.title,
     date: new Date(p.publishedAt ?? p.createdAt ?? Date.now()),
     excerpt: p.excerpt,
-    category: p.category,
+    featuredImage: p.featuredImage,
   }))
 } catch (err) {
   console.error('[home] getPosts failed:', err)
@@ -29,23 +35,15 @@ try {
 <Layout>
   <Hero />
   {recentPosts.length > 0 && (
-    <section class="w-full bg-neutral-950 pt-20 pb-6 border-t border-neutral-800">
-      <div class="max-w-3xl mx-auto px-6">
-        <div class="flex items-center justify-between mb-12">
-          <h2 class="text-neutral-100 text-xs uppercase tracking-widest font-heading">Latest Posts</h2>
-          <span class="text-neutral-700 text-xs">{new Date().getFullYear()}</span>
-        </div>
-        {recentPosts.map((post) => (
-          <PostCard post={post} />
-        ))}
-        <div class="pt-8 mt-4">
-          <a href="/blog" class="inline-flex items-center gap-2 text-lime-400 text-xs uppercase tracking-widest hover:gap-4 transition-all font-heading no-underline">
-            View all posts
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
-            </svg>
-          </a>
-        </div>
+    <section class="w-full bg-neutral-950 pt-16 pb-20 border-t border-neutral-800">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          {recentPosts.map((post) => (
+            <li class="min-w-0">
+              <PostCard post={post} />
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   )}

@@ -1,0 +1,44 @@
+---
+import { getPosts } from '../../lib/content'
+
+interface Props {
+  count?: number
+  showThumbnails?: boolean
+  showDate?: boolean
+}
+
+const { count = 5, showDate = true } = Astro.props
+
+let posts: Awaited<ReturnType<typeof getPosts>> = []
+try {
+  posts = await getPosts(count)
+} catch {
+  posts = []
+}
+---
+
+{posts.length > 0 && (
+  <ul role="list" class="flex flex-col gap-3">
+    {posts.map((post) => {
+      const date = new Date(post.publishedAt ?? post.createdAt ?? Date.now())
+      return (
+        <li class="min-w-0">
+          <a
+            href={`/blog/${post.slug}`}
+            class="text-neutral-300 text-base sm:text-sm hover:text-lime-400 no-underline text-pretty"
+          >
+            {post.title}
+          </a>
+          {showDate && (
+            <time
+              datetime={date.toISOString()}
+              class="block text-neutral-600 text-base sm:text-xs font-heading tabular-nums"
+            >
+              {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </time>
+          )}
+        </li>
+      )
+    })}
+  </ul>
+)}

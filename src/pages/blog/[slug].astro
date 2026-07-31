@@ -2,11 +2,16 @@
 export const prerender = false
 
 import Layout from '../../layouts/Layout.astro'
-import Content from '../../components/Content.astro'
-import ArticleHeader from '../../components/posts/ArticleHeader.astro'
 import FeaturedImage from '../../components/posts/FeaturedImage.astro'
 import RichText from '../../components/RichText.astro'
-import { getPost } from '../../lib/content'
+import WidgetRenderer from '../../components/WidgetRenderer.astro'
+import PostCard from '../../components/PostCard.astro'
+import {
+  getPost,
+  getRelatedPosts,
+  getSidebarWidgets,
+  wordCountFromBody,
+} from '../../lib/content'
 
 const slug = Astro.params.slug
 if (!slug) {
@@ -19,33 +24,125 @@ if (!post) {
 }
 
 const title = post.title
-const dateObj = new Date(post.publishedAt ?? post.createdAt ?? Date.now())
 const excerpt = post.excerpt
 const body = post.body
-const category = post.category
+const categories = post.categories
+const primaryCategorySlug = categories[0]?.slug
 const featuredImageUrl = post.featuredImage?.url ?? null
 const featuredImageAlt = post.featuredImage?.alt ?? ''
-const rawText = JSON.stringify(post.body ?? '').replace(/[#*`[\]()>_~|!{}",:]+/g, ' ')
-const wordCount = rawText.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length.toLocaleString('en-US')
+const wordCount = wordCountFromBody(post.body)
+const authorName = 'Johnathan Lyman'
+
+const sidebarWidgets = await getSidebarWidgets()
+const related = await getRelatedPosts(primaryCategorySlug, post.id, 3)
+
+const edit = post.edit
 ---
 
 <Layout title={title} description={excerpt}>
-  <ArticleHeader
-    title={title}
-    excerpt={excerpt}
-    date={dateObj}
-    category={category}
-    backHref="/blog"
-    backLabel="Back to posts"
-    showAuthorMeta={true}
-    wordCount={wordCount}
-  />
+  {post.isPreview && (
+    <div class="w-full bg-lime-400 text-neutral-950 text-center text-base sm:text-xs font-heading uppercase tracking-wide py-2">
+      Viewing preview. This content is not published.
+    </div>
+  )}
 
-  <Content>
-    {featuredImageUrl && (
-      <FeaturedImage src={featuredImageUrl} alt={featuredImageAlt} />
-    )}
+  <article class="w-full bg-neutral-950" {...edit}>
+    <div class="max-w-[1200px] mx-auto px-6 py-12 flex flex-col gap-10">
+      <div>
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-neutral-600 text-base sm:text-xs lowercase tracking-wide hover:text-lime-400 font-heading no-underline"
+        >
+          <svg class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19.5 12h-15m0 0l6.75 6.75M4.5 12l6.75-6.75"></path>
+          </svg>
+          Back to posts
+        </a>
+      </div>
 
-    <RichText content={body} class="rich-text" />
-  </Content>
+      <header class="flex flex-col gap-6">
+        {excerpt && (
+          <p class="text-neutral-400 text-base text-pretty uppercase" {...edit?.excerpt}>
+            {excerpt}
+          </p>
+        )}
+        <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading text-pretty" {...edit?.title}>
+          {title}
+        </h1>
+        <hr class="border-neutral-800 my-0" />
+      </header>
+
+      <div
+        class:list={[
+          'grid grid-cols-1 gap-10 lg:gap-8 items-start',
+          sidebarWidgets.length > 0
+            ? 'lg:grid-cols-[200px_minmax(0,1fr)_240px]'
+            : 'lg:grid-cols-[200px_minmax(0,1fr)]',
+        ]}
+      >
+        <aside class="flex flex-col gap-6 text-base sm:text-xs">
+          <div class="flex flex-col gap-1">
+            <p class="text-neutral-600">Author</p>
+            <p class="text-neutral-100 font-heading lowercase">{authorName}</p>
+          </div>
+
+          {categories.length > 0 && (
+            <div class="flex flex-col gap-2">
+              <p class="text-neutral-600">Filed under</p>
+              <ul role="list" class="flex flex-col gap-1">
+                {categories.map((cat) => (
+                  <li class="text-neutral-100 font-heading lowercase">{cat.label}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div class="flex flex-col gap-1">
+            <p class="text-neutral-600">Length</p>
+            <p class="text-neutral-100 font-heading lowercase tabular-nums">{wordCount} words</p>
+          </div>
+        </aside>
+
+        <div class="min-w-0 flex flex-col gap-10" {...edit?.body}>
+          {featuredImageUrl && (
+            <div {...edit?.featured_image}>
+              <FeaturedImage src={featuredImageUrl} alt={featuredImageAlt} />
+            </div>
+          )}
+          <RichText content={body} class="rich-text" />
+        </div>
+
+        {sidebarWidgets.length > 0 && (
+          <aside class="flex flex-col gap-10 min-w-0">
+            {sidebarWidgets.map((widget) => (
+              <WidgetRenderer widget={widget} />
+            ))}
+          </aside>
+        )}
+      </div>
+
+      {related.length > 0 && (
+        <section class="flex flex-col gap-8 pt-8 border-t border-neutral-800">
+          <h2 class="text-neutral-100 text-base sm:text-xs font-heading uppercase tracking-widest text-balance">
+            Read this next
+          </h2>
+          <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+            {related.map((item) => (
+              <li class="min-w-0">
+                <PostCard
+                  post={{
+                    slug: item.slug,
+                    title: item.title,
+                    date: new Date(item.publishedAt ?? item.createdAt ?? Date.now()),
+                    excerpt: item.excerpt,
+                    featuredImage: item.featuredImage,
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  </article>
 </Layout>

@@ -2,8 +2,6 @@
 export const prerender = false
 
 import Layout from '../layouts/Layout.astro'
-import Content from '../components/Content.astro'
-import ArticleHeader from '../components/posts/ArticleHeader.astro'
 import RichText from '../components/RichText.astro'
 import { getPage } from '../lib/content'
 import RaindropIoLinks from '../components/RaindropIoLinks.astro'
@@ -16,16 +14,36 @@ if (!page) {
     { status: 503, statusText: 'Service Unavailable' },
   )
 }
+
+const edit = page.edit
 ---
 
 <Layout title={page.title} description={page.excerpt}>
-  <ArticleHeader
-    title={page.title}
-    excerpt={page.excerpt}
-  />
+  {page.isPreview && (
+    <div class="w-full bg-lime-400 text-neutral-950 text-center text-base sm:text-xs font-heading uppercase tracking-wide py-2">
+      Viewing preview. This content is not published.
+    </div>
+  )}
 
-  <Content>
-    <RichText content={page.body} class="rich-text" />
-    <RaindropIoLinks />
-  </Content>
+  <article class="w-full bg-neutral-950" {...edit}>
+    <section class="w-full pt-16 pb-6 border-t border-neutral-800">
+      <div class="max-w-3xl mx-auto px-6 flex flex-col gap-6">
+        {page.excerpt && (
+          <p class="text-neutral-400 text-base text-pretty uppercase" {...edit?.excerpt}>
+            {page.excerpt}
+          </p>
+        )}
+        <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading text-pretty" {...edit?.title}>
+          {page.title}
+        </h1>
+      </div>
+    </section>
+
+    <section class="content-container w-full pb-16">
+      <div class="max-w-3xl mx-auto px-6 flex flex-col gap-10" {...edit?.body}>
+        <RichText content={page.body} class="rich-text" />
+        <RaindropIoLinks />
+      </div>
+    </section>
+  </article>
 </Layout>

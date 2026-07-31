@@ -1,0 +1,84 @@
+---
+export const prerender = false
+
+import Layout from '../layouts/Layout.astro'
+import { searchSite } from '../lib/content'
+
+const q = (Astro.url.searchParams.get('q') ?? '').trim()
+
+let results: { collection: string; slug: string | null; title?: string; snippet?: string }[] = []
+if (q) {
+  const response = await searchSite(q, 30)
+  results = (response.items ?? []).map((item) => ({
+    collection: item.collection,
+    slug: item.slug,
+    title: item.title,
+    snippet: item.snippet,
+  }))
+}
+
+function hrefFor(item: (typeof results)[number]) {
+  if (!item.slug) return '#'
+  if (item.collection === 'posts') return `/blog/${item.slug}`
+  return `/${item.slug}`
+}
+---
+
+<Layout title={q ? `Search: ${q}` : 'Search'} description="Search posts and pages">
+  <section class="w-full bg-neutral-950 py-16 border-b border-neutral-800">
+    <div class="max-w-[1200px] mx-auto px-6 flex flex-col gap-8">
+      <div class="flex flex-col gap-3">
+        <p class="text-lime-400 text-base sm:text-xs uppercase tracking-widest font-heading">Search</p>
+        <h1 class="text-neutral-100 text-3xl font-heading text-pretty">Find something</h1>
+      </div>
+
+      <form action="/search" method="get" class="flex flex-col sm:flex-row gap-3" role="search">
+        <label class="sr-only" for="search-q">Search query</label>
+        <input
+          id="search-q"
+          type="search"
+          name="q"
+          value={q}
+          placeholder="Search posts and pages…"
+          class="grow min-w-0 bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-base sm:text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:border-lime-400"
+        />
+        <button
+          type="submit"
+          class="shrink-0 bg-lime-400 text-neutral-950 px-5 py-2.5 text-base sm:text-xs font-heading uppercase tracking-wide hover:bg-lime-300"
+        >
+          Search
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section class="w-full bg-neutral-950 py-12">
+    <div class="max-w-[1200px] mx-auto px-6 flex flex-col gap-8">
+      {!q && (
+        <p class="text-neutral-500 text-base sm:text-sm">Enter a query to search.</p>
+      )}
+
+      {q && results.length === 0 && (
+        <p class="text-neutral-500 text-base sm:text-sm">No results for “{q}”.</p>
+      )}
+
+      {results.length > 0 && (
+        <ul role="list" class="flex flex-col gap-6">
+          {results.map((item) => (
+            <li class="border-b border-neutral-900 pb-6 last:border-b-0">
+              <p class="text-neutral-600 text-base sm:text-xs font-heading uppercase tracking-wide mb-2">
+                {item.collection}
+              </p>
+              <a href={hrefFor(item)} class="text-neutral-100 text-lg font-heading hover:text-lime-400 no-underline text-pretty">
+                {item.title || item.slug || 'Untitled'}
+              </a>
+              {item.snippet && (
+                <p class="text-neutral-500 text-base sm:text-sm text-pretty mt-2" set:html={item.snippet} />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+</Layout>

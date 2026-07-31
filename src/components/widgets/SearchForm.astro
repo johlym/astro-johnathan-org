@@ -1,0 +1,24 @@
+---
+interface Props {
+  placeholder?: string
+}
+
+const { placeholder = 'Search…' } = Astro.props
+---
+
+<form action="/search" method="get" class="flex flex-col gap-2" role="search">
+  <label class="sr-only" for="widget-search">Search</label>
+  <input
+    id="widget-search"
+    type="search"
+    name="q"
+    placeholder={placeholder}
+    class="w-full bg-neutral-900 border border-neutral-800 px-3 py-2.5 sm:py-1.5 text-base sm:text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:border-lime-400"
+  />
+  <button
+    type="submit"
+    class="self-start text-lime-400 text-base sm:text-xs font-heading uppercase tracking-wide hover:text-lime-300"
+  >
+    Search
+  </button>
+</form>

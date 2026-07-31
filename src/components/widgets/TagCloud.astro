@@ -1,0 +1,38 @@
+---
+import { getTaxonomyTerms } from 'emdash'
+
+interface Props {
+  showCount?: boolean
+  limit?: number
+}
+
+const { showCount = false, limit = 30 } = Astro.props
+
+type Term = { label: string; slug: string; count?: number }
+
+let terms: Term[] = []
+try {
+  const result = await getTaxonomyTerms('tag')
+  terms = ((result ?? []) as Term[]).slice(0, limit)
+} catch {
+  terms = []
+}
+---
+
+{terms.length > 0 && (
+  <ul role="list" class="flex flex-wrap gap-2">
+    {terms.map((term) => (
+      <li>
+        <a
+          href={`/blog?tag=${encodeURIComponent(term.slug)}`}
+          class="text-neutral-400 text-base sm:text-xs hover:text-lime-400 no-underline lowercase"
+        >
+          {term.label}
+          {showCount && term.count != null && (
+            <span class="text-neutral-600 tabular-nums"> ({term.count})</span>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

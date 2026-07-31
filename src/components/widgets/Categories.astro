@@ -1,0 +1,49 @@
+---
+import { getTaxonomyTerms } from 'emdash'
+
+interface Props {
+  showCount?: boolean
+  hierarchical?: boolean
+}
+
+const { showCount = false } = Astro.props
+
+type Term = { label: string; slug: string; count?: number; children?: Term[] }
+
+let terms: Term[] = []
+try {
+  const result = await getTaxonomyTerms('category')
+  terms = (result ?? []) as Term[]
+} catch {
+  terms = []
+}
+
+function flatten(items: Term[], depth = 0): Array<Term & { depth: number }> {
+  const out: Array<Term & { depth: number }> = []
+  for (const item of items) {
+    out.push({ ...item, depth })
+    if (item.children?.length) out.push(...flatten(item.children, depth + 1))
+  }
+  return out
+}
+
+const flat = flatten(terms)
+---
+
+{flat.length > 0 && (
+  <ul role="list" class="flex flex-col gap-2">
+    {flat.map((term) => (
+      <li class:list={[{ 'pl-3': term.depth > 0 }]}>
+        <a
+          href={`/blog?category=${encodeURIComponent(term.slug)}`}
+          class="text-neutral-300 text-base sm:text-sm hover:text-lime-400 no-underline lowercase"
+        >
+          {term.label}
+          {showCount && term.count != null && (
+            <span class="text-neutral-600 tabular-nums"> ({term.count})</span>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

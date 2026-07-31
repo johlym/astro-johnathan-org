@@ -10,11 +10,11 @@ const { src, alt } = Astro.props;
 const optimized = heroImage(src);
 ---
 
-<div class="mb-12 overflow-hidden">
+<div class="overflow-hidden">
   <img
     src={optimized}
     alt={alt}
-    class="w-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+    class="w-full object-cover grayscale hover:grayscale-0 outline-1 -outline-offset-1 outline-white/10"
     loading="eager"
   />
 </div>

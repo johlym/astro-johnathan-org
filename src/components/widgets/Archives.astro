@@ -1,0 +1,58 @@
+---
+import { getPosts } from '../../lib/content'
+
+interface Props {
+  type?: string
+  limit?: number
+}
+
+const { limit = 12 } = Astro.props
+
+let archives: { label: string; href: string; count: number }[] = []
+
+try {
+  const posts = await getPosts(1000)
+  const map = new Map<string, { label: string; href: string; count: number; sort: number }>()
+
+  for (const post of posts) {
+    const date = new Date(post.publishedAt ?? post.createdAt ?? Date.now())
+    if (Number.isNaN(date.getTime())) continue
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    const existing = map.get(key)
+    if (existing) {
+      existing.count += 1
+    } else {
+      map.set(key, {
+        label,
+        href: `/blog?month=${key}`,
+        count: 1,
+        sort: date.getFullYear() * 100 + date.getMonth(),
+      })
+    }
+  }
+
+  archives = [...map.values()]
+    .sort((a, b) => b.sort - a.sort)
+    .slice(0, limit)
+    .map(({ label, href, count }) => ({ label, href, count }))
+} catch {
+  archives = []
+}
+---
+
+{archives.length > 0 && (
+  <ul role="list" class="flex flex-col gap-2">
+    {archives.map((item) => (
+      <li>
+        <a
+          href={item.href}
+          class="text-neutral-300 text-base sm:text-sm hover:text-lime-400 no-underline"
+        >
+          {item.label}
+          <span class="text-neutral-600 tabular-nums"> ({item.count})</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

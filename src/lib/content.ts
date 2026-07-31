@@ -4,7 +4,17 @@ import {
   getMenu,
   getSiteSettings as getEmDashSiteSettings,
   getEntryTerms,
+  getEntriesByTerm,
+  getWidgetArea,
+  search as emdashSearch,
+  type EditProxy,
+  type Widget,
+  type WidgetArea,
 } from 'emdash'
+
+export type NavLink = { href: string; label: string }
+
+export type CategoryTerm = { label: string; slug: string }
 
 export type EmDashPost = {
   id: string
@@ -17,7 +27,11 @@ export type EmDashPost = {
   publishedAt?: string | null
   createdAt?: string
   updatedAt?: string
+  /** First category label (convenience). */
   category?: string
+  categories: CategoryTerm[]
+  edit?: EditProxy
+  isPreview?: boolean
 }
 
 export type EmDashPage = {
@@ -26,6 +40,8 @@ export type EmDashPage = {
   title: string
   excerpt?: string
   body: unknown
+  edit?: EditProxy
+  isPreview?: boolean
 }
 
 export type WorkExperience = {
@@ -45,6 +61,16 @@ export type Certification = {
   issued?: string | null
 }
 
+export type PaginatedPosts = {
+  posts: EmDashPost[]
+  page: number
+  totalPages: number
+  total: number
+  perPage: number
+}
+
+export const BLOG_PER_PAGE = 12
+
 function entryData(entry: { id: string; data: Record<string, unknown> }) {
   return entry.data
 }
@@ -53,10 +79,72 @@ function entrySlug(entry: { id: string; data: Record<string, unknown> }, fallbac
   const data = entry.data
   const fromData = data.slug
   if (typeof fromData === 'string' && fromData) return fromData
-  // EmDash may expose slug on the entry object outside `data`
   const top = (entry as { slug?: unknown }).slug
   if (typeof top === 'string' && top) return top
   return fallback ?? entry.id
+}
+
+async function categoriesForEntry(entryId: string): Promise<CategoryTerm[]> {
+  try {
+    const terms = await getEntryTerms('posts', entryId, 'category')
+    if (!terms?.length) return []
+    return terms
+      .map((t) => ({
+        label: String(t.label ?? t.slug ?? ''),
+        slug: String(t.slug ?? ''),
+      }))
+      .filter((t) => t.label)
+  } catch {
+    return []
+  }
+}
+
+function mapPostEntry(
+  entry: { id: string; data: Record<string, unknown>; edit?: EditProxy; slug?: string },
+  categories: CategoryTerm[],
+  opts?: { isPreview?: boolean },
+): EmDashPost {
+  const data = entryData(entry)
+  return {
+    id: entry.id,
+    slug: entrySlug(entry),
+    title: String(data.title ?? ''),
+    excerpt: data.excerpt ? String(data.excerpt) : undefined,
+    body: data.body,
+    featuredImage: (data.featured_image as EmDashPost['featuredImage']) ?? null,
+    showTableOfContents: Boolean(data.show_table_of_contents),
+    publishedAt: (data.publishedAt as string | null | undefined) ?? null,
+    createdAt: data.createdAt as string | undefined,
+    updatedAt: data.updatedAt as string | undefined,
+    category: categories[0]?.label,
+    categories,
+    edit: entry.edit,
+    isPreview: opts?.isPreview,
+  }
+}
+
+function sortPostsByDate(posts: EmDashPost[]) {
+  posts.sort((a, b) => {
+    const da = new Date(a.publishedAt ?? a.createdAt ?? 0).getTime()
+    const db = new Date(b.publishedAt ?? b.createdAt ?? 0).getTime()
+    return db - da
+  })
+  return posts
+}
+
+async function menuToNav(name: string): Promise<NavLink[]> {
+  try {
+    const menu = await getMenu(name)
+    if (!menu?.items?.length) return []
+    return menu.items
+      .map((item) => ({
+        href: item.url || '/',
+        label: item.label || '',
+      }))
+      .filter((l) => l.label)
+  } catch {
+    return []
+  }
 }
 
 export async function getPosts(limit = 100) {
@@ -68,64 +156,57 @@ export async function getPosts(limit = 100) {
 
   const posts: EmDashPost[] = []
   for (const entry of entries) {
-    const data = entryData(entry)
-    let category: string | undefined
-    try {
-      const terms = await getEntryTerms('posts', entry.id, 'category')
-      category = terms?.[0]?.label ?? terms?.[0]?.slug
-    } catch {
-      // taxonomy optional
-    }
-    posts.push({
-      id: entry.id,
-      slug: entrySlug(entry),
-      title: String(data.title ?? ''),
-      excerpt: data.excerpt ? String(data.excerpt) : undefined,
-      body: data.body,
-      featuredImage: (data.featured_image as EmDashPost['featuredImage']) ?? null,
-      showTableOfContents: Boolean(data.show_table_of_contents),
-      publishedAt: (data.publishedAt as string | null | undefined) ?? null,
-      createdAt: data.createdAt as string | undefined,
-      updatedAt: data.updatedAt as string | undefined,
-      category,
-    })
+    const categories = await categoriesForEntry(entry.id)
+    posts.push(mapPostEntry(entry, categories))
   }
 
-  posts.sort((a, b) => {
-    const da = new Date(a.publishedAt ?? a.createdAt ?? 0).getTime()
-    const db = new Date(b.publishedAt ?? b.createdAt ?? 0).getTime()
-    return db - da
-  })
+  return sortPostsByDate(posts)
+}
 
-  return posts
+export async function getPaginatedPosts(page = 1, perPage = BLOG_PER_PAGE): Promise<PaginatedPosts> {
+  const all = await getPosts(1000)
+  const total = all.length
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  const safePage = Number.isFinite(page) && page >= 1 ? Math.min(Math.floor(page), totalPages) : 1
+  const start = (safePage - 1) * perPage
+  return {
+    posts: all.slice(start, start + perPage),
+    page: safePage,
+    totalPages,
+    total,
+    perPage,
+  }
 }
 
 export async function getPost(slug: string) {
-  const { entry, error } = await getEmDashEntry('posts', slug)
+  const { entry, error, isPreview } = await getEmDashEntry('posts', slug)
   if (error || !entry) return null
 
-  const data = entryData(entry)
-  let category: string | undefined
-  try {
-    const terms = await getEntryTerms('posts', entry.id, 'category')
-    category = terms?.[0]?.label ?? terms?.[0]?.slug
-  } catch {
-    // optional
-  }
+  const categories = await categoriesForEntry(entry.id)
+  return mapPostEntry(entry, categories, { isPreview })
+}
 
-  return {
-    id: entry.id,
-    slug: entrySlug(entry, slug),
-    title: String(data.title ?? ''),
-    excerpt: data.excerpt ? String(data.excerpt) : undefined,
-    body: data.body,
-    featuredImage: (data.featured_image as EmDashPost['featuredImage']) ?? null,
-    showTableOfContents: Boolean(data.show_table_of_contents),
-    publishedAt: (data.publishedAt as string | null | undefined) ?? null,
-    createdAt: data.createdAt as string | undefined,
-    updatedAt: data.updatedAt as string | undefined,
-    category,
-  } satisfies EmDashPost
+export async function getRelatedPosts(
+  categorySlug: string | undefined,
+  excludeId: string,
+  limit = 3,
+): Promise<EmDashPost[]> {
+  if (!categorySlug) return []
+
+  try {
+    const entries = await getEntriesByTerm('posts', 'category', categorySlug)
+    const posts: EmDashPost[] = []
+    for (const entry of entries) {
+      if (entry.id === excludeId) continue
+      const data = entryData(entry)
+      if (data.status && data.status !== 'published') continue
+      const categories = await categoriesForEntry(entry.id)
+      posts.push(mapPostEntry(entry, categories))
+    }
+    return sortPostsByDate(posts).slice(0, limit)
+  } catch {
+    return []
+  }
 }
 
 export async function getPages() {
@@ -143,12 +224,13 @@ export async function getPages() {
       title: String(data.title ?? ''),
       excerpt: data.excerpt ? String(data.excerpt) : undefined,
       body: data.body,
+      edit: entry.edit,
     } satisfies EmDashPage
   })
 }
 
 export async function getPage(slug: string) {
-  const { entry, error } = await getEmDashEntry('pages', slug)
+  const { entry, error, isPreview } = await getEmDashEntry('pages', slug)
   if (error || !entry) return null
   const data = entryData(entry)
   return {
@@ -157,6 +239,8 @@ export async function getPage(slug: string) {
     title: String(data.title ?? ''),
     excerpt: data.excerpt ? String(data.excerpt) : undefined,
     body: data.body,
+    edit: entry.edit,
+    isPreview,
   } satisfies EmDashPage
 }
 
@@ -173,17 +257,31 @@ export async function getSiteSettings() {
 }
 
 export async function getPrimaryNav() {
+  return menuToNav('primary')
+}
+
+export async function getSocialsNav() {
+  return menuToNav('socials')
+}
+
+export async function getSidebarWidgets(): Promise<Widget[]> {
   try {
-    const menu = await getMenu('primary')
-    if (!menu?.items?.length) return []
-    return menu.items
-      .map((item) => ({
-        href: item.url || '/',
-        label: item.label || '',
-      }))
-      .filter((l) => l.label)
+    const area: WidgetArea | null = await getWidgetArea('sidebar')
+    return area?.widgets ?? []
   } catch {
     return []
+  }
+}
+
+export async function searchSite(query: string, limit = 20) {
+  try {
+    return await emdashSearch(query, {
+      collections: ['posts', 'pages'],
+      status: 'published',
+      limit,
+    })
+  } catch {
+    return { items: [] }
   }
 }
 
@@ -250,4 +348,9 @@ export async function getCertifications(ids?: string[]) {
   }
 
   return docs
+}
+
+export function wordCountFromBody(body: unknown): string {
+  const rawText = JSON.stringify(body ?? '').replace(/[#*`[\]()>_~|!{}",:]+/g, ' ')
+  return rawText.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length.toLocaleString('en-US')
 }

@@ -1,0 +1,53 @@
+---
+import { thumbImage } from '../lib/image'
+
+interface Props {
+  post: {
+    slug: string
+    title: string
+    date: Date
+    excerpt?: string
+    featuredImage?: { url?: string; alt?: string } | null
+  }
+}
+
+const { post } = Astro.props
+const imageUrl = post.featuredImage?.url ? thumbImage(post.featuredImage.url) : null
+const imageAlt = post.featuredImage?.alt || ''
+const dateStr = post.date.toLocaleDateString('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
+---
+
+<article class="group flex flex-col gap-4 min-w-0">
+  <a href={`/blog/${post.slug}`} class="no-underline flex flex-col gap-4">
+    {imageUrl && (
+      <div class="aspect-[16/10] overflow-hidden bg-neutral-900">
+        <img
+          src={imageUrl}
+          alt={imageAlt}
+          class="size-full object-cover grayscale group-hover:grayscale-0 outline-1 -outline-offset-1 outline-white/10"
+          loading="lazy"
+        />
+      </div>
+    )}
+    <div class="flex flex-col gap-2 min-w-0">
+      <h3 class="text-neutral-100 text-base sm:text-sm font-heading text-pretty group-hover:text-lime-400">
+        {post.title}
+      </h3>
+      <time
+        datetime={post.date.toISOString()}
+        class="text-neutral-600 text-base sm:text-xs font-heading tabular-nums"
+      >
+        {dateStr}
+      </time>
+      {post.excerpt && (
+        <p class="text-neutral-500 text-base sm:text-sm text-pretty line-clamp-3">
+          {post.excerpt}
+        </p>
+      )}
+    </div>
+  </a>
+</article>
