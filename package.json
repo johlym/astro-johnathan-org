@@ -12,7 +12,8 @@
     "deploy": "astro build && wrangler deploy",
     "check": "astro check",
     "migrate:payload": "node scripts/migrate-from-payload/migrate.mjs",
-    "migrate:md": "node scripts/import-md-posts/import.mjs"
+    "migrate:md": "node scripts/import-md-posts/import.mjs",
+    "migrate:md:categories": "node scripts/import-md-posts/assign-categories.mjs"
   },
   "emdash": {
     "seed": ".emdash/seed.json"

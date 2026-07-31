@@ -20,12 +20,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { legacyMarkdownToPortableText } from './md-to-portable-text.mjs'
+import { createEmDashClient } from '../lib/emdash-api.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '../..')
 const POSTS_DIR = path.join(ROOT, 'src/content/posts')
 
-const EMDASH = (process.env.EMDASH_URL || 'http://localhost:4321').replace(/\/$/, '')
 const TOKEN = process.env.EMDASH_TOKEN || ''
 const DRY = process.env.DRY_RUN === '1'
 const ON_CONFLICT = process.env.ON_CONFLICT || 'skip' // skip | prefer-md | prefer-cms
@@ -34,6 +34,13 @@ if (!TOKEN && !DRY) {
   console.error('Set EMDASH_TOKEN (or DRY_RUN=1)')
   process.exit(1)
 }
+
+const {
+  EMDASH,
+  emdash,
+  getCategoryIdBySlug,
+  assignPostCategories,
+} = createEmDashClient({ dry: DRY, token: TOKEN })
 
 function parseFrontmatter(raw) {
   if (!raw.startsWith('---')) return { data: {}, body: raw }
@@ -70,25 +77,6 @@ function slugFromFilename(filename) {
   return base.replace(/^\d{4}-\d{2}-\d{2}-/, '')
 }
 
-async function emdash(method, pathName, body) {
-  if (DRY) {
-    console.log(`[dry] ${method} ${pathName}`)
-    return { data: { id: 'dry' } }
-  }
-  const res = await fetch(`${EMDASH}/_emdash/api${pathName}`, {
-    method,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${TOKEN}`,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  })
-  const json = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(`${res.status} ${method} ${pathName}: ${JSON.stringify(json)}`)
-  return json
-}
-
 async function findBySlug(slug) {
   try {
     const res = await emdash('GET', `/content/posts/${encodeURIComponent(slug)}`)
@@ -98,18 +86,6 @@ async function findBySlug(slug) {
     return { ...item, _rev: res.data?._rev ?? item._rev }
   } catch {
     return null
-  }
-}
-
-async function ensureCategory(slug) {
-  if (!slug) return
-  try {
-    await emdash('POST', '/taxonomies/category/terms', {
-      slug,
-      label: slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-    })
-  } catch {
-    // exists
   }
 }
 
@@ -168,6 +144,7 @@ async function main() {
   let created = 0
   let updated = 0
   let skipped = 0
+  const categoryIdBySlug = await getCategoryIdBySlug()
 
   for (const file of files) {
     const raw = fs.readFileSync(path.join(POSTS_DIR, file), 'utf8')
@@ -193,7 +170,6 @@ async function main() {
       continue
     }
 
-    await ensureCategory(category)
     const pt = legacyMarkdownToPortableText(body)
 
     // Image fields require `{ id: mediaId }` (or omit). A legacy URL / null
@@ -208,7 +184,7 @@ async function main() {
       console.warn(`  note: skipping feature_image for ${slug} (needs media upload): ${data.feature_image}`)
     }
 
-    await upsertPost(slug, payload, {
+    const postId = await upsertPost(slug, payload, {
       publish: !draft,
       publishedAt,
       existing,
@@ -221,14 +197,11 @@ async function main() {
       console.log(`created ${slug}`)
     }
 
-    if (category && !DRY) {
+    if (category) {
       try {
-        await emdash('POST', `/content/posts/${encodeURIComponent(slug)}/terms`, {
-          taxonomy: 'category',
-          terms: [category],
-        })
-      } catch {
-        // ignore
+        await assignPostCategories(postId || slug, category, categoryIdBySlug)
+      } catch (err) {
+        console.warn(`  category assign ${slug}:`, err.message)
       }
     }
   }

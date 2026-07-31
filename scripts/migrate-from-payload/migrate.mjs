@@ -16,6 +16,7 @@
  */
 
 import { lexicalToPortableText } from './lexical-to-portable-text.mjs'
+import { createEmDashClient } from '../lib/emdash-api.mjs'
 
 const PAYLOAD = (process.env.PAYLOAD_API_URL || 'https://cms.johnathan.org').replace(/\/$/, '')
 const EMDASH = (process.env.EMDASH_URL || 'http://localhost:4321').replace(/\/$/, '')
@@ -26,6 +27,12 @@ if (!TOKEN && !DRY) {
   console.error('Set EMDASH_TOKEN (or DRY_RUN=1)')
   process.exit(1)
 }
+
+const { assignPostCategories, getCategoryIdBySlug } = createEmDashClient({
+  baseUrl: EMDASH,
+  token: TOKEN,
+  dry: DRY,
+})
 
 async function payloadFetch(path) {
   const res = await fetch(`${PAYLOAD}${path}`, { headers: { Accept: 'application/json' } })
@@ -162,6 +169,7 @@ async function main() {
     await ensureCategory(cat.slug, cat.title)
     console.log(`✓ category ${cat.slug}`)
   }
+  const categoryTermIdBySlug = await getCategoryIdBySlug()
 
   // Work experience
   const experiences = await payloadAll('work-experience')
@@ -233,17 +241,15 @@ async function main() {
     })
 
     // Assign category if present
+    // Correct API: POST /content/posts/:id/terms/category { termIds: [...] }
     const catId =
       post.category && typeof post.category === 'object'
         ? post.category.id
         : post.category
     const catSlug = catId ? categorySlugById[String(catId)] : null
-    if (catSlug && !DRY) {
+    if (catSlug) {
       try {
-        await emdash('POST', `/content/posts/${encodeURIComponent(post.slug)}/terms`, {
-          taxonomy: 'category',
-          terms: [catSlug],
-        })
+        await assignPostCategories(post.slug, catSlug, categoryTermIdBySlug)
       } catch (err) {
         console.warn(`  category assign ${post.slug}:`, err.message)
       }

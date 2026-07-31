@@ -78,6 +78,16 @@ function entryData(entry: { id: string; data: Record<string, unknown> }) {
   return entry.data
 }
 
+/**
+ * EmDash ContentEntry: `data.id` is the ULID (used in content_taxonomies),
+ * `entry.id` is typically the slug.
+ */
+function entryDbId(entry: { id: string; data: Record<string, unknown> }) {
+  const fromData = entry.data.id
+  if (typeof fromData === 'string' && fromData) return fromData
+  return entry.id
+}
+
 function entrySlug(entry: { id: string; data: Record<string, unknown> }, fallback?: string) {
   const data = entry.data
   const fromData = data.slug
@@ -87,16 +97,29 @@ function entrySlug(entry: { id: string; data: Record<string, unknown> }, fallbac
   return fallback ?? entry.id
 }
 
-async function categoriesForEntry(entryId: string): Promise<CategoryTerm[]> {
+function mapCategoryTerms(terms: Array<{ label?: string; slug?: string }> | undefined): CategoryTerm[] {
+  if (!terms?.length) return []
+  return terms
+    .map((t) => ({
+      label: String(t.label ?? t.slug ?? ''),
+      slug: String(t.slug ?? ''),
+    }))
+    .filter((t) => t.label && t.slug)
+}
+
+async function categoriesForEntry(
+  entry: { id: string; data: Record<string, unknown> },
+): Promise<CategoryTerm[]> {
+  // Prefer terms hydrated onto the entry by getEmDashCollection / getEmDashEntry
+  const hydrated = entry.data.terms as Record<string, Array<{ label?: string; slug?: string }>> | undefined
+  if (hydrated?.category?.length) {
+    return mapCategoryTerms(hydrated.category)
+  }
+
   try {
-    const terms = await getEntryTerms('posts', entryId, 'category')
-    if (!terms?.length) return []
-    return terms
-      .map((t) => ({
-        label: String(t.label ?? t.slug ?? ''),
-        slug: String(t.slug ?? ''),
-      }))
-      .filter((t) => t.label)
+    // Must use the ULID (`data.id`), not the slug (`entry.id`)
+    const terms = await getEntryTerms('posts', entryDbId(entry), 'category')
+    return mapCategoryTerms(terms)
   } catch {
     return []
   }
@@ -109,7 +132,7 @@ function mapPostEntry(
 ): EmDashPost {
   const data = entryData(entry)
   return {
-    id: entry.id,
+    id: entryDbId(entry),
     slug: entrySlug(entry),
     title: String(data.title ?? ''),
     excerpt: data.excerpt ? String(data.excerpt) : undefined,
@@ -159,7 +182,7 @@ export async function getPosts(limit = 100) {
 
   const posts: EmDashPost[] = []
   for (const entry of entries) {
-    const categories = await categoriesForEntry(entry.id)
+    const categories = await categoriesForEntry(entry)
     posts.push(mapPostEntry(entry, categories))
   }
 
@@ -189,9 +212,37 @@ export async function getPaginatedPostsByCategory(
   page = 1,
   perPage = BLOG_PER_PAGE,
 ): Promise<PaginatedPosts> {
-  const all = await getPosts(1000)
-  const filtered = all.filter((p) => p.categories.some((c) => c.slug === categorySlug))
-  return paginatePosts(filtered, page, perPage)
+  // Prefer EmDash's term filter (same path admin counts use) over client-side filtering
+  try {
+    const { entries, error } = await getEmDashCollection('posts', {
+      status: 'published',
+      limit: 1000,
+      where: { category: categorySlug },
+    })
+    if (error) throw error
+
+    const posts: EmDashPost[] = []
+    for (const entry of entries) {
+      const categories = await categoriesForEntry(entry)
+      posts.push(mapPostEntry(entry, categories))
+    }
+    return paginatePosts(sortPostsByDate(posts), page, perPage)
+  } catch {
+    // Fallback: getEntriesByTerm
+    try {
+      const entries = await getEntriesByTerm('posts', 'category', categorySlug)
+      const posts: EmDashPost[] = []
+      for (const entry of entries) {
+        const data = entryData(entry)
+        if (data.status && data.status !== 'published') continue
+        const categories = await categoriesForEntry(entry)
+        posts.push(mapPostEntry(entry, categories))
+      }
+      return paginatePosts(sortPostsByDate(posts), page, perPage)
+    } catch {
+      return paginatePosts([], page, perPage)
+    }
+  }
 }
 
 export async function getCategory(slug: string): Promise<TaxonomyTerm | null> {
@@ -202,44 +253,20 @@ export async function getCategory(slug: string): Promise<TaxonomyTerm | null> {
   }
 }
 
-/**
- * Category terms with post counts derived from published posts.
- * EmDash's includeCounts can return 0 when pivot/translation_group data is out of sync;
- * counting via entry terms matches what the site actually lists.
- */
+/** Official EmDash API — includeCounts populates term.count (defaults to true). */
 export async function getCategoryTermsWithCounts(includeCounts = true): Promise<TaxonomyTerm[]> {
-  let terms: TaxonomyTerm[] = []
   try {
-    terms = await getTaxonomyTerms('category', { includeCounts: false })
+    return await getTaxonomyTerms('category', { includeCounts })
   } catch {
     return []
   }
-
-  if (!includeCounts) return terms
-
-  const posts = await getPosts(1000).catch(() => [] as EmDashPost[])
-  const bySlug = new Map<string, number>()
-  for (const post of posts) {
-    for (const cat of post.categories) {
-      bySlug.set(cat.slug, (bySlug.get(cat.slug) ?? 0) + 1)
-    }
-  }
-
-  const applyCounts = (items: TaxonomyTerm[]): TaxonomyTerm[] =>
-    items.map((term) => ({
-      ...term,
-      count: bySlug.get(term.slug) ?? 0,
-      children: applyCounts(term.children ?? []),
-    }))
-
-  return applyCounts(terms)
 }
 
 export async function getPost(slug: string) {
   const { entry, error, isPreview } = await getEmDashEntry('posts', slug)
   if (error || !entry) return null
 
-  const categories = await categoriesForEntry(entry.id)
+  const categories = await categoriesForEntry(entry)
   return mapPostEntry(entry, categories, { isPreview })
 }
 
@@ -254,10 +281,10 @@ export async function getRelatedPosts(
     const entries = await getEntriesByTerm('posts', 'category', categorySlug)
     const posts: EmDashPost[] = []
     for (const entry of entries) {
-      if (entry.id === excludeId) continue
+      if (entryDbId(entry) === excludeId) continue
       const data = entryData(entry)
       if (data.status && data.status !== 'published') continue
-      const categories = await categoriesForEntry(entry.id)
+      const categories = await categoriesForEntry(entry)
       posts.push(mapPostEntry(entry, categories))
     }
     return sortPostsByDate(posts).slice(0, limit)
