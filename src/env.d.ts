@@ -6,6 +6,9 @@ interface ImportMetaEnv {
   readonly PUBLIC_MEDIA_URL?: string
   readonly PUBLIC_IMAGE_HOST?: string
   readonly EMDASH_CLOUDFLARE?: string
+  readonly BENTO_SITE_UUID?: string
+  readonly BENTO_PUBLISHABLE_KEY?: string
+  readonly BENTO_SECRET_KEY?: string
 }
 
 interface ImportMeta {

@@ -48,6 +48,11 @@ cd astro-frontend
 
 # Raindrop proxy — still needed (copy from old Payload Worker secrets)
 pnpm exec wrangler secret put RAINDROP_API_TEST_TOKEN
+
+# Bento transactional email (magic links, invites, comment notifications)
+pnpm exec wrangler secret put BENTO_SITE_UUID
+pnpm exec wrangler secret put BENTO_PUBLISHABLE_KEY
+pnpm exec wrangler secret put BENTO_SECRET_KEY
 ```
 
 ## 3. Deploy status
@@ -119,4 +124,7 @@ Local uses SQLite (`./data.db`) and `./uploads`. Both are gitignored.
 
 - Content edits appear immediately (SSR live collections) — no Deploy Hook.
 - Scheduled publish requires the Worker cron trigger (already in wrangler).
-- Optional later: KV object cache, D1 read replicas, `cloudflareEmail` plugin.
+- Optional later: KV object cache, D1 read replicas.
+- Email: `bentoEmail` plugin (`src/plugins/bento-email.ts`). After deploy,
+  activate under **Admin → Extensions**, then select it under **Settings → Email**.
+  `from` in `astro.config.mjs` must match a Bento Author.

@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 import emdash, { local } from 'emdash/astro'
 import { sqlite } from 'emdash/db'
 import { d1, r2 } from '@emdash-cms/cloudflare'
+import { bentoEmail } from './src/plugins/bento-email.ts'
 
 // Use D1/R2 in production builds; local SQLite + filesystem for `astro dev`.
 const useCloudflareBindings =
@@ -38,6 +39,10 @@ export default defineConfig({
             directory: './uploads',
             baseUrl: '/_emdash/api/media/file',
           }),
+      plugins: [
+        // `from` must be a Bento Author (Emails → Authors). No no-reply addresses.
+        bentoEmail({ from: 'johnathan@johnathan.org' }),
+      ],
     }),
   ],
 })
