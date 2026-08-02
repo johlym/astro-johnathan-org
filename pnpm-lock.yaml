@@ -20,6 +20,9 @@ importers:
       '@astrojs/rss':
         specifier: ^4.0.19
         version: 4.0.19
+      '@bentonow/bento-node-sdk':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@emdash-cms/cloudflare':
         specifier: ^0.31.1
         version: 0.31.1(3ceacde14043b0bfb3125530488b17e6)
@@ -294,6 +297,10 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@bentonow/bento-node-sdk@2.0.0':
+    resolution: {integrity: sha512-uFqyos3IZ5ITK0g3cdeRpGtC3B23UJQdwspqgIiSXcN5isVqSLa2cNUvOWClE24GOtlNhas5nNx5EWk3q7sx9A==}
+    engines: {node: '>=18'}
 
   '@capsizecss/unpack@4.0.0':
     resolution: {integrity: sha512-VERIM64vtTP1C4mxQ5thVT9fK0apjPFobqybMtA1UdUujWka24ERHbRHFGmpbbhp73MhV+KSsHQH9C6uOTdEQA==}
@@ -4774,6 +4781,8 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@bentonow/bento-node-sdk@2.0.0': {}
 
   '@capsizecss/unpack@4.0.0':
     dependencies:
