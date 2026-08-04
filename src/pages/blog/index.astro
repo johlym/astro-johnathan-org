@@ -20,12 +20,14 @@ const requestedPage = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawP
 let posts: Awaited<ReturnType<typeof getPaginatedPosts>>['posts'] = []
 let page = 1
 let totalPages = 1
+let total = 0
 
 try {
   const result = await getPaginatedPosts(requestedPage)
   posts = result.posts
   page = result.page
   totalPages = result.totalPages
+  total = result.total
 
   if (requestedPage > totalPages && totalPages >= 1) {
     return Astro.redirect(totalPages === 1 ? '/blog' : `/blog?page=${totalPages}`)
@@ -36,5 +38,5 @@ try {
 ---
 
 <Layout title="Blog">
-  <BlogArchive posts={posts} page={page} totalPages={totalPages} />
+  <BlogArchive posts={posts} page={page} totalPages={totalPages} total={total} />
 </Layout>

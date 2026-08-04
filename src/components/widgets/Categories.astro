@@ -47,11 +47,11 @@ const flat = flatten(terms)
       <li class:list={[{ 'pl-3': term.depth > 0 }]}>
         <a
           href={`/blog/${encodeURIComponent(term.slug)}`}
-          class="text-neutral-300 text-base sm:text-sm hover:text-lime-400 no-underline lowercase"
+          class="text-zinc-400 text-sm hover:text-lime-400 no-underline lowercase"
         >
           {term.label}
           {showCount && term.count !== undefined && (
-            <span class="text-neutral-600 tabular-nums"> ({term.count})</span>
+            <span class="text-zinc-600 font-mono tabular-nums"> ({term.count})</span>
           )}
         </a>
       </li>

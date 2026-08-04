@@ -45,14 +45,14 @@ try {
   <div class="space-y-4 my-8">
     <h2>Work Experience</h2>
     {experiences.map((exp) => (
-      <div class="p-4 rounded-md bg-neutral-900 border border-lime-400">
-        <div class="font-bold text-lime-400">{exp.title}</div>
-        <div class="text-sm text-neutral-300">{exp.where}</div>
-        <div class="text-sm text-neutral-400 mt-1">
+      <div class="p-6 bg-zinc-900/40 border border-zinc-900 hover:border-lime-400/30 transition-all rounded-lg">
+        <div class="font-heading font-bold text-white">{exp.title}</div>
+        <div class="text-sm text-zinc-400 mt-1">{exp.where}</div>
+        <div class="text-xs text-zinc-500 font-mono mt-2">
           {formatDate(exp.from)} – {exp.current ? 'Present' : exp.to ? formatDate(exp.to) : ''}
         </div>
         {exp.details && (
-          <p class="text-sm text-neutral-300">{exp.details}</p>
+          <p class="text-sm text-zinc-400 mt-3 leading-relaxed">{exp.details}</p>
         )}
       </div>
     ))}

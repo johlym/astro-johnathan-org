@@ -6,8 +6,8 @@ interface Props {
 
 const { items } = Astro.props
 ---
-<nav class="mb-10 p-5 border border-neutral-800 bg-neutral-900" aria-label="Table of Contents">
-  <p class="text-xs font-heading uppercase tracking-widest text-neutral-500 mb-4">
+<nav class="mb-10 p-5 border border-zinc-800 bg-zinc-900/40 rounded-lg" aria-label="Table of Contents">
+  <p class="text-xs font-mono uppercase tracking-widest text-lime-400 mb-4">
     On This Page
   </p>
   <ul class="space-y-2 text-sm">
@@ -16,7 +16,7 @@ const { items } = Astro.props
         (item.depth === 3 || item.tag === 'h3') ? 'ml-4' :
         (item.depth === 4 || item.tag === 'h4') ? 'ml-8' : ''
       return (
-        <li class={`${indent} list-disc list-inside text-neutral-400`}>
+        <li class={`${indent} list-disc list-inside text-zinc-400`}>
           <a href={`#${item.id}`} class=" hover:text-lime-400 transition-colors no-underline hover:underline text-xs font-heading">
             {item.text}
           </a>

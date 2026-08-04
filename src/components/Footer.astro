@@ -1,4 +1,5 @@
 ---
+import Logo from './Logo.astro'
 import type { NavLink } from '../lib/content'
 
 interface Props {
@@ -12,30 +13,33 @@ const { siteTitle, siteDescription = '', primaryLinks = [], socialLinks = [] } =
 const year = new Date().getFullYear()
 ---
 
-<footer class="w-full bg-neutral-950 border-t border-neutral-800 py-12">
-  <div class="max-w-[1200px] mx-auto px-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-      <div class="flex flex-col gap-3 min-w-0">
-        <div class="flex items-center gap-3">
-          <div class="size-8 bg-lime-400 flex items-center justify-center shrink-0">
-            <span class="text-neutral-950 text-xs font-bold leading-none">J.<br />ORG</span>
-          </div>
-          <span class="text-neutral-100 text-sm font-heading lowercase">{siteTitle}</span>
-        </div>
-        {siteDescription && (
-          <p class="text-neutral-500 text-base sm:text-xs text-pretty">{siteDescription}</p>
+<footer class="py-20 px-6 md:px-12 bg-zinc-950 border-t border-zinc-900">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+      <div class="md:col-span-4">
+        <a href="/" class="group inline-flex items-center gap-3 mb-4 no-underline">
+          <Logo siteTitle={siteTitle} size="sm" />
+        </a>
+        {siteDescription ? (
+          <p class="text-sm text-zinc-500 font-light max-w-xs leading-relaxed">
+            {siteDescription}
+          </p>
+        ) : (
+          <p class="text-sm text-zinc-500 font-light max-w-xs leading-relaxed">
+            An Internet property by Johnathan Lyman. Built to archive thoughts, logs, and technical experiments.
+          </p>
         )}
       </div>
 
-      <div class="flex flex-col gap-3 min-w-0">
-        <p class="text-neutral-600 text-base sm:text-xs font-heading uppercase tracking-wide">Menu</p>
+      <div class="md:col-span-2 md:col-start-6">
+        <h5 class="font-mono text-xs text-white uppercase tracking-wider mb-6">Menu</h5>
         {primaryLinks.length > 0 ? (
-          <ul role="list" class="flex flex-col gap-2">
+          <ul role="list" class="space-y-3">
             {primaryLinks.map((link) => (
               <li>
                 <a
                   href={link.href}
-                  class="text-neutral-400 text-base sm:text-sm font-normal hover:text-lime-400 no-underline lowercase"
+                  class="text-sm text-zinc-400 hover:text-lime-400 transition-colors no-underline lowercase"
                 >
                   {link.label}
                 </a>
@@ -45,30 +49,48 @@ const year = new Date().getFullYear()
         ) : null}
       </div>
 
-      <div class="flex flex-col gap-3 min-w-0">
-        <p class="text-neutral-600 text-base sm:text-xs font-heading uppercase tracking-wide">Socials</p>
+      <div class="md:col-span-3">
+        <h5 class="font-mono text-xs text-white uppercase tracking-wider mb-6">Socials</h5>
         {socialLinks.length > 0 ? (
-          <ul role="list" class="flex flex-col gap-2">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3">
             {socialLinks.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class="text-neutral-400 text-base sm:text-sm font-normal hover:text-lime-400 no-underline lowercase"
-                >
-                  {link.label}
-                </a>
-              </li>
+              <a
+                href={link.href}
+                class="text-sm text-zinc-400 hover:text-lime-400 transition-colors no-underline lowercase"
+              >
+                {link.label}
+              </a>
             ))}
-          </ul>
+          </div>
         ) : null}
       </div>
 
-      <div class="flex flex-col gap-3 min-w-0">
-        <p class="text-neutral-600 text-base sm:text-xs font-heading uppercase tracking-wide">Copyright</p>
-        <p class="text-neutral-500 text-base sm:text-xs tabular-nums">
-          &copy; 2014–{year} {siteTitle} – An Internet by-product by Johnathan Lyman.
+      <div class="md:col-span-3">
+        <h5 class="font-mono text-xs text-white uppercase tracking-wider mb-6">Copyright</h5>
+        <p class="text-xs text-zinc-500 leading-relaxed">
+          &copy; 2014–{year} {siteTitle} — An Internet by-product by Johnathan Lyman. All rights observed.
         </p>
       </div>
     </div>
+
+    <div class="pt-8 border-t border-zinc-900 flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-xs text-zinc-600 font-mono">
+        Designed for absolute minimalism. Handcrafted with Astro &amp; modern layouts.
+      </p>
+      <button
+        type="button"
+        id="back-to-top"
+        class="text-xs font-mono text-zinc-500 hover:text-lime-400 transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0"
+      >
+        Back to top ↑
+      </button>
+    </div>
   </div>
 </footer>
+
+<script>
+  const button = document.getElementById('back-to-top')
+  button?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+</script>

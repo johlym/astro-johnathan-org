@@ -8,3 +8,4 @@ data.db
 data.db-*
 uploads/
 .wrangler/
+emdash-env.d.ts

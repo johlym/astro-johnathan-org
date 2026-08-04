@@ -25,14 +25,14 @@ try {
         <li class="min-w-0">
           <a
             href={`/blog/${post.slug}`}
-            class="text-neutral-300 text-base sm:text-sm hover:text-lime-400 no-underline text-pretty"
+            class="text-zinc-300 text-sm hover:text-lime-400 no-underline text-pretty"
           >
             {post.title}
           </a>
           {showDate && (
             <time
               datetime={date.toISOString()}
-              class="block text-neutral-600 text-base sm:text-xs font-heading tabular-nums"
+              class="block text-zinc-600 text-xs font-mono tabular-nums"
             >
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </time>
