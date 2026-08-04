@@ -52,12 +52,12 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-re
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <script is:inline src="https://cdn.usefathom.com/script.js" data-site="PSXSYBXV" defer></script>
   </head>
-  <body class="min-h-dvh flex flex-col bg-neutral-950 text-neutral-100 isolate">
+  <body class="min-h-dvh flex flex-col bg-zinc-950 text-zinc-100 isolate font-body selection:bg-lime-400 selection:text-black">
     <Header siteTitle={siteTitle} navLinks={navLinks} />
     <main class="flex-1 w-full">
       <slot />

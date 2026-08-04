@@ -5,6 +5,7 @@ import Layout from '../layouts/Layout.astro'
 import Hero from '../components/homepage/Hero.astro'
 import PostCard from '../components/PostCard.astro'
 import { getPosts } from '../lib/content'
+import { readingMinutes } from '../lib/format'
 
 const LIMIT = 6
 
@@ -13,7 +14,9 @@ type CardPost = {
   title: string
   date: Date
   excerpt?: string
-  featuredImage?: { url?: string; alt?: string } | null
+  category?: string
+  readingMinutes?: number
+  tags?: string[]
 }
 
 let recentPosts: CardPost[] = []
@@ -25,25 +28,62 @@ try {
     title: p.title,
     date: new Date(p.publishedAt ?? p.createdAt ?? Date.now()),
     excerpt: p.excerpt,
-    featuredImage: p.featuredImage,
+    category: p.category,
+    readingMinutes: readingMinutes(p.body),
+    tags: p.categories.map((c) => c.label),
   }))
 } catch (err) {
   console.error('[home] getPosts failed:', err)
 }
+
+const featured = recentPosts.slice(0, 2)
+const archive = recentPosts.slice(2, 6)
+const year = new Date().getFullYear()
 ---
 
 <Layout>
   <Hero />
-  {recentPosts.length > 0 && (
-    <section class="w-full bg-neutral-950 pt-16 pb-20 border-t border-neutral-800">
-      <div class="max-w-[1200px] mx-auto px-6">
-        <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-          {recentPosts.map((post) => (
-            <li class="min-w-0">
-              <PostCard post={post} />
-            </li>
+
+  {featured.length > 0 && (
+    <section class="py-20 md:py-28 px-6 md:px-12 bg-zinc-950">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-zinc-900">
+          <div>
+            <p class="font-mono text-xs text-lime-400 uppercase tracking-widest mb-2">Featured Writing</p>
+            <h2 class="font-heading text-3xl md:text-4xl font-bold text-white">Selected Entries</h2>
+          </div>
+          <span class="text-xs font-mono text-zinc-500 mt-2 md:mt-0">
+            Updated {year} — Ongoing Stream of Consciousness
+          </span>
+        </div>
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12">
+          {featured.map((post, i) => (
+            <div class:list={[i === 0 ? 'lg:col-span-7' : 'lg:col-span-5']}>
+              <PostCard post={post} variant="featured" />
+            </div>
           ))}
-        </ul>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {archive.length > 0 && (
+    <section class="py-20 md:py-28 px-6 md:px-12 bg-zinc-950 border-t border-zinc-900">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex items-end justify-between mb-12">
+          <p class="font-mono text-xs text-lime-400 uppercase tracking-widest">The Log Archives</p>
+          <a
+            href="/blog"
+            class="text-xs font-mono text-zinc-500 hover:text-lime-400 transition-colors no-underline"
+          >
+            View all posts →
+          </a>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {archive.map((post) => (
+            <PostCard post={post} variant="archive" />
+          ))}
+        </div>
       </div>
     </section>
   )}

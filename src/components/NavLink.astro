@@ -1,15 +1,25 @@
 ---
-
 interface Props {
   href: string
   label: string
 }
 
 const { href, label } = Astro.props
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/'
+const target = href.replace(/\/$/, '') || '/'
+const isActive =
+  target === '/'
+    ? pathname === '/'
+    : pathname === target || pathname.startsWith(`${target}/`)
 ---
+
 <a
   href={href}
-  class="text-neutral-400 text-base sm:text-xs tracking-wide hover:text-lime-400 no-underline lowercase"
+  class:list={[
+    'font-medium text-sm no-underline lowercase transition-colors',
+    isActive ? 'text-lime-400' : 'text-zinc-400 hover:text-lime-400',
+  ]}
+  aria-current={isActive ? 'page' : undefined}
 >
   {label}
 </a>

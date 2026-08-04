@@ -1,5 +1,5 @@
 ---
-import { thumbImage } from '../lib/image'
+import { formatPostDate } from '../lib/format'
 
 interface Props {
   post: {
@@ -7,47 +7,81 @@ interface Props {
     title: string
     date: Date
     excerpt?: string
-    featuredImage?: { url?: string; alt?: string } | null
+    category?: string
+    readingMinutes?: number
+    tags?: string[]
   }
+  variant?: 'featured' | 'archive' | 'related'
 }
 
-const { post } = Astro.props
-const imageUrl = post.featuredImage?.url ? thumbImage(post.featuredImage.url) : null
-const imageAlt = post.featuredImage?.alt || ''
-const dateStr = post.date.toLocaleDateString('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-})
+const { post, variant = 'archive' } = Astro.props
+const dateStr = formatPostDate(post.date)
+const href = `/blog/${post.slug}`
 ---
 
-<article class="group flex flex-col gap-4 min-w-0">
-  <a href={`/blog/${post.slug}`} class="no-underline flex flex-col gap-4">
-    {imageUrl && (
-      <div class="aspect-[16/10] overflow-hidden bg-neutral-900">
-        <img
-          src={imageUrl}
-          alt={imageAlt}
-          class="size-full object-cover grayscale group-hover:grayscale-0 outline-1 -outline-offset-1 outline-white/10"
-          loading="lazy"
-        />
+{variant === 'featured' ? (
+  <a
+    href={href}
+    class="flex flex-col justify-between p-8 bg-zinc-900/40 border border-zinc-900 hover:border-lime-400/30 transition-all duration-300 group rounded-lg no-underline h-full min-h-[280px]"
+  >
+    <div>
+      <div class="flex items-center gap-4 text-xs font-mono text-zinc-500 mb-6">
+        <time datetime={post.date.toISOString()}>{dateStr}</time>
+        {post.category && (
+          <>
+            <span class="w-1 h-1 rounded-full bg-zinc-700" aria-hidden="true"></span>
+            <span class="text-lime-400">{post.category}</span>
+          </>
+        )}
       </div>
-    )}
-    <div class="flex flex-col gap-2 min-w-0">
-      <h3 class="text-neutral-100 text-base sm:text-sm font-heading text-pretty group-hover:text-lime-400">
+      <h3 class="font-heading text-2xl md:text-3xl font-bold text-white group-hover:text-lime-400 transition-colors leading-tight mb-4 text-pretty">
         {post.title}
       </h3>
-      <time
-        datetime={post.date.toISOString()}
-        class="text-neutral-600 text-base sm:text-xs font-heading tabular-nums"
-      >
-        {dateStr}
-      </time>
       {post.excerpt && (
-        <p class="text-neutral-500 text-base sm:text-sm text-pretty line-clamp-3">
+        <p class="text-zinc-400 text-base leading-relaxed mb-8 line-clamp-3">
           {post.excerpt}
         </p>
       )}
     </div>
+    <div class="pt-6 border-t border-zinc-900 flex items-center justify-between">
+      <span class="font-mono text-xs text-zinc-400 group-hover:text-lime-400 transition-colors">
+        Read complete note →
+      </span>
+      {post.readingMinutes != null && (
+        <span class="text-xs text-zinc-600 font-mono">{post.readingMinutes} min read</span>
+      )}
+    </div>
   </a>
-</article>
+) : (
+  <a
+    href={href}
+    class:list={[
+      'group p-6 bg-zinc-900/20 border border-zinc-900 hover:border-zinc-800 transition-all duration-300 flex flex-col justify-between no-underline h-full',
+      variant === 'related' ? 'rounded-lg min-h-[200px]' : 'min-h-[220px]',
+    ]}
+  >
+    <div>
+      <time
+        datetime={post.date.toISOString()}
+        class="font-mono text-xs text-zinc-600 block mb-4"
+      >
+        {dateStr}
+      </time>
+      <h3 class="font-heading font-bold text-lg text-white group-hover:text-lime-400 transition-colors mb-2 leading-snug text-pretty">
+        {post.title}
+      </h3>
+      {post.excerpt && (
+        <p class="text-zinc-500 text-xs line-clamp-3">
+          {post.excerpt}
+        </p>
+      )}
+    </div>
+    {(post.category || (post.tags && post.tags.length > 0)) && (
+      <div class="text-[10px] font-mono text-lime-400/60 mt-4">
+        {post.tags?.length
+          ? post.tags.map((t) => `#${t}`).join(' ')
+          : `#${post.category}`}
+      </div>
+    )}
+  </a>
+)}

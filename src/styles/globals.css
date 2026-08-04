@@ -1,17 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --font-body: "JetBrains Mono", ui-monospace, monospace;
-  --font-heading: "Space Mono", ui-monospace, monospace;
+  --font-body: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   html {
-    @apply bg-neutral-950 text-neutral-100 antialiased scheme-only-dark;
+    @apply bg-zinc-950 text-zinc-100 antialiased scheme-only-dark;
   }
 
   body {
     @apply font-body leading-relaxed;
+  }
+
+  ::selection {
+    @apply bg-lime-400 text-black;
   }
 
   a {
@@ -28,30 +32,30 @@
   }
 
   hr {
-    @apply my-8 border-neutral-800;
+    @apply my-8 border-zinc-800;
   }
 
   pre {
-    @apply overflow-x-auto bg-neutral-950 p-4 text-sm;
+    @apply overflow-x-auto bg-zinc-950 p-4 text-sm;
   }
 
   pre.astro-code {
-    @apply border border-neutral-800;
-    background-color: rgb(23 23 23) !important; /* neutral-900 */
+    @apply border border-zinc-800;
+    background-color: rgb(24 24 27) !important; /* zinc-900 */
   }
 
   code:not(pre code) {
-    @apply bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 text-sm font-body;
+    @apply bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 text-sm font-mono;
   }
 
   blockquote {
-    @apply border-l-4 border-lime-400 pl-4 italic text-neutral-500;
+    @apply border-l-2 border-lime-400 pl-6 italic text-zinc-200;
   }
 }
 
 /* Rich text / post content styles */
 .rich-text {
-  @apply text-neutral-400 text-sm leading-relaxed;
+  @apply text-zinc-300 text-base leading-relaxed;
 }
 
 .rich-text > * + * {
@@ -59,27 +63,27 @@
 }
 
 .rich-text p {
-  @apply text-neutral-400 text-[15px] leading-relaxed my-4 mx-0;
+  @apply text-zinc-300 text-base leading-relaxed my-6 mx-0;
 }
 
 .rich-text h1,
 .rich-text h2,
 .rich-text h3,
 .rich-text h4 {
-  @apply font-heading text-neutral-100 pt-4;
+  @apply font-heading text-white pt-4;
 }
 
 .rich-text h1 {
-  @apply text-2xl;
+  @apply text-2xl md:text-3xl font-bold;
 }
 .rich-text h2 {
-  @apply text-xl;
+  @apply text-xl md:text-2xl font-bold mt-12 mb-4 pt-0;
 }
 .rich-text h3 {
-  @apply text-lg;
+  @apply text-lg font-bold;
 }
 .rich-text h4 {
-  @apply text-base;
+  @apply text-base font-bold;
 }
 
 .rich-text a,
@@ -88,19 +92,19 @@
 }
 
 .rich-text strong {
-  @apply text-neutral-200 font-bold;
+  @apply text-zinc-100 font-semibold;
 }
 
 .rich-text em {
-  @apply italic text-neutral-300;
+  @apply italic text-zinc-200;
 }
 
 .rich-text blockquote {
-  @apply border-l-2 border-lime-400 pl-6 py-2 my-10 not-italic;
+  @apply border-l-2 border-lime-400 pl-6 my-10 not-italic;
 }
 
 .rich-text blockquote p {
-  @apply text-neutral-100 text-lg font-heading leading-snug;
+  @apply text-zinc-200 text-lg italic leading-relaxed;
 }
 
 .rich-text ul {
@@ -124,13 +128,13 @@
 }
 
 .rich-text figcaption {
-  @apply text-neutral-700 text-xs mt-3;
+  @apply text-zinc-600 text-xs font-mono mt-3 text-center;
 }
 
 .rich-text pre {
-  @apply my-6;
+  @apply my-6 bg-zinc-900/60 border border-zinc-800 rounded-lg p-6 font-mono text-sm text-zinc-400;
 }
 
 .rich-text hr {
-  @apply my-8 border-neutral-800;
+  @apply my-8 border-zinc-800;
 }

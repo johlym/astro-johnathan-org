@@ -1,0 +1,30 @@
+---
+interface Props {
+  siteTitle: string
+  size?: 'sm' | 'md'
+  showTitle?: boolean
+}
+
+const { siteTitle, size = 'md', showTitle = true } = Astro.props
+const boxClass = size === 'sm' ? 'size-7' : 'size-8'
+const textClass = size === 'sm' ? 'text-[10px]' : 'text-xs'
+---
+
+<span class="flex items-center gap-3 min-w-0">
+  <span
+    class:list={[
+      boxClass,
+      'bg-lime-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105',
+    ]}
+    aria-hidden="true"
+  >
+    <span class:list={[textClass, 'text-zinc-950 font-bold leading-none text-center']}>
+      J.<br />ORG
+    </span>
+  </span>
+  {showTitle && (
+    <span class="font-heading font-bold text-lg tracking-tight text-white group-hover:text-lime-400 transition-colors lowercase truncate">
+      {siteTitle}
+    </span>
+  )}
+</span>

@@ -42,14 +42,14 @@ const dateStr = date
   : ''
 ---
 
-<section class="w-full bg-neutral-950 pt-20 pb-6 border-t border-neutral-800">
+<section class="w-full bg-zinc-950 pt-20 pb-6 border-t border-zinc-800">
   <div class="max-w-3xl mx-auto px-6">
 
     {backHref && (
       <div class="mb-12">
         <a
           href={backHref}
-          class="inline-flex items-center gap-2 text-neutral-600 text-xs lowercase tracking-wide hover:text-lime-400 transition-colors font-heading no-underline"
+          class="inline-flex items-center gap-2 text-zinc-600 text-xs lowercase tracking-wide hover:text-lime-400 transition-colors font-heading no-underline"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path d="M19.5 12h-15m0 0l6.75 6.75M4.5 12l6.75-6.75"></path>
@@ -63,31 +63,31 @@ const dateStr = date
       {allTags.length > 0 && (
         <div class="flex items-center gap-3 mb-6">
           {allTags.map((tag) => (
-            <span class="text-xs text-neutral-700 bg-neutral-900 px-2 py-1 font-heading uppercase">{tag}</span>
+            <span class="text-xs text-zinc-700 bg-zinc-900 px-2 py-1 font-heading uppercase">{tag}</span>
           ))}
         </div>
       )}
 
       {excerpt && (
-        <p class="text-neutral-400 text-base leading-relaxed uppercase">{excerpt}</p>
+        <p class="text-zinc-400 text-base leading-relaxed uppercase">{excerpt}</p>
       )}
 
-      <h1 class="text-neutral-100 text-3xl md:text-4xl font-heading leading-tight mb-10">{title}</h1>
+      <h1 class="text-zinc-100 text-3xl md:text-4xl font-heading leading-tight mb-10">{title}</h1>
 
       {showAuthorMeta && date && (
-        <div class="flex items-center gap-4 py-6 border-t border-b border-neutral-800">
+        <div class="flex items-center gap-4 py-6 border-t border-b border-zinc-800">
             <div class="flex items-center gap-6">
               <div>
-                <p class="text-neutral-600 text-xs mb-0.5">guy who wrote this</p>
-                <p class="text-neutral-100 text-xs font-heading lowercase">{authorNameDisplay}</p>
+                <p class="text-zinc-600 text-xs mb-0.5">guy who wrote this</p>
+                <p class="text-zinc-100 text-xs font-heading lowercase">{authorNameDisplay}</p>
               </div>
             </div>
 
           {date && (
             <div class="flex flex-1 justify-end gap-6 shrink-0">
               <div class="text-right">
-                <p class="text-neutral-600 text-xs mb-0.5">published</p>
-                <p class="text-neutral-100 text-xs font-heading lowercase">{dateStr}</p>
+                <p class="text-zinc-600 text-xs mb-0.5">published</p>
+                <p class="text-zinc-100 text-xs font-heading lowercase">{dateStr}</p>
               </div>
             </div>
           )}
@@ -95,8 +95,8 @@ const dateStr = date
           {wordCount && (
             <div class="flex items-center gap-6 shrink-0">
               <div class="text-right">
-                <p class="text-neutral-600 text-xs mb-0.5">words</p>
-                <p class="text-neutral-100 text-xs font-heading lowercase">{wordCount}</p>
+                <p class="text-zinc-600 text-xs mb-0.5">words</p>
+                <p class="text-zinc-100 text-xs font-heading lowercase">{wordCount}</p>
               </div>
             </div>
           )}

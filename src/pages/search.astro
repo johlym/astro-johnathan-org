@@ -25,11 +25,11 @@ function hrefFor(item: (typeof results)[number]) {
 ---
 
 <Layout title={q ? `Search: ${q}` : 'Search'} description="Search posts and pages">
-  <section class="w-full bg-neutral-950 py-16 border-b border-neutral-800">
-    <div class="max-w-[1200px] mx-auto px-6 flex flex-col gap-8">
-      <div class="flex flex-col gap-3">
-        <p class="text-lime-400 text-base sm:text-xs uppercase tracking-widest font-heading">Search</p>
-        <h1 class="text-neutral-100 text-3xl font-heading text-pretty">Find something</h1>
+  <section class="w-full bg-zinc-950 py-16 md:py-24 px-6 md:px-12 border-b border-zinc-900">
+    <div class="max-w-7xl mx-auto flex flex-col gap-8">
+      <div>
+        <p class="font-mono text-xs text-lime-400 uppercase tracking-widest mb-3">Search</p>
+        <h1 class="font-heading text-3xl md:text-5xl font-bold text-white tracking-tight">Find something</h1>
       </div>
 
       <form action="/search" method="get" class="flex flex-col sm:flex-row gap-3" role="search">
@@ -40,11 +40,11 @@ function hrefFor(item: (typeof results)[number]) {
           name="q"
           value={q}
           placeholder="Search posts and pages…"
-          class="grow min-w-0 bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-base sm:text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:border-lime-400"
+          class="grow min-w-0 bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-lime-400/40 font-mono"
         />
         <button
           type="submit"
-          class="shrink-0 bg-lime-400 text-neutral-950 px-5 py-2.5 text-base sm:text-xs font-heading uppercase tracking-wide hover:bg-lime-300"
+          class="shrink-0 bg-zinc-900 hover:bg-lime-400 hover:text-black border border-zinc-800 text-sm font-medium px-5 py-2.5 transition-all duration-300"
         >
           Search
         </button>
@@ -52,29 +52,34 @@ function hrefFor(item: (typeof results)[number]) {
     </div>
   </section>
 
-  <section class="w-full bg-neutral-950 py-12">
-    <div class="max-w-[1200px] mx-auto px-6 flex flex-col gap-8">
+  <section class="w-full bg-zinc-950 py-12 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto flex flex-col gap-8">
       {!q && (
-        <p class="text-neutral-500 text-base sm:text-sm">Enter a query to search.</p>
+        <p class="text-zinc-500 text-sm font-mono">Enter a query to search.</p>
       )}
 
       {q && results.length === 0 && (
-        <p class="text-neutral-500 text-base sm:text-sm">No results for “{q}”.</p>
+        <p class="text-zinc-500 text-sm font-mono">No results for “{q}”.</p>
       )}
 
       {results.length > 0 && (
-        <ul role="list" class="flex flex-col gap-6">
+        <ul role="list" class="flex flex-col gap-1">
           {results.map((item) => (
-            <li class="border-b border-neutral-900 pb-6 last:border-b-0">
-              <p class="text-neutral-600 text-base sm:text-xs font-heading uppercase tracking-wide mb-2">
-                {item.collection}
-              </p>
-              <a href={hrefFor(item)} class="text-neutral-100 text-lg font-heading hover:text-lime-400 no-underline text-pretty">
-                {item.title || item.slug || 'Untitled'}
+            <li>
+              <a
+                href={hrefFor(item)}
+                class="archive-entry group flex flex-col gap-2 p-5 bg-zinc-900/20 border border-zinc-900 hover:border-lime-400/30 hover:bg-zinc-900/40 transition-all duration-300 no-underline"
+              >
+                <p class="text-zinc-600 text-[10px] font-mono uppercase tracking-wider">
+                  {item.collection}
+                </p>
+                <span class="font-heading font-semibold text-white group-hover:text-lime-400 transition-colors text-pretty">
+                  {item.title || item.slug || 'Untitled'}
+                </span>
+                {item.snippet && (
+                  <p class="text-zinc-500 text-sm text-pretty" set:html={item.snippet} />
+                )}
               </a>
-              {item.snippet && (
-                <p class="text-neutral-500 text-base sm:text-sm text-pretty mt-2" set:html={item.snippet} />
-              )}
             </li>
           ))}
         </ul>

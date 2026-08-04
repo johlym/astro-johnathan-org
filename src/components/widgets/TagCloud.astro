@@ -33,11 +33,11 @@ try {
       <li>
         <a
           href={`/blog?tag=${encodeURIComponent(term.slug)}`}
-          class="text-neutral-400 text-base sm:text-xs hover:text-lime-400 no-underline lowercase"
+          class="text-zinc-400 text-base sm:text-xs hover:text-lime-400 no-underline lowercase"
         >
           {term.label}
           {showCount && term.count !== undefined && (
-            <span class="text-neutral-600 tabular-nums"> ({term.count})</span>
+            <span class="text-zinc-600 tabular-nums"> ({term.count})</span>
           )}
         </a>
       </li>
