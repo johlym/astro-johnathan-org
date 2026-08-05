@@ -122,9 +122,34 @@ Local uses SQLite (`./data.db`) and `./uploads`. Both are gitignored.
 
 ## Notes
 
-- Content edits appear immediately (SSR live collections) — no Deploy Hook.
-- Scheduled publish requires the Worker cron trigger (already in wrangler).
-- Optional later: KV object cache, D1 read replicas.
+- **Full-page edge cache:** Workers Caching is enabled (`cache.enabled` in
+  `wrangler.jsonc`) with Astro route rules + `workersCache` provider
+  (`src/cache/`). Anonymous HTML is cached at the edge (`Cf-Cache-Status: HIT`
+  means the Worker did not run). Browser TTL stays short (60s); edge TTL is
+  1 hour with stale-while-revalidate up to 1 day.
+- **Automatic purge on EmDash writes:** publish / update / unpublish / delete
+  already call Astro `cache.invalidate({ tags: [collection, id] })`. The
+  provider maps that to Workers `cache.purge({ tags })`, so the post/page,
+  blog index, home, RSS, and sitemap refresh without a Deploy Hook.
+- Preview / `?_edit` responses are never cached (`private, no-store` / route
+  cache opt-out). Visual editing uses `toolbar: "client"` so cached anonymous
+  HTML still shows an Edit pill for logged-in editors.
+- Scheduled publish requires the Worker cron trigger (already in wrangler);
+  the scheduled handler also purges tags for anything it publishes.
+- Optional later: KV object cache (`objectCache: kvCache(...)`), D1 read replicas.
 - Email: `bentoEmail` plugin (`src/plugins/bento-email.ts`). After deploy,
   activate under **Admin → Extensions**, then select it under **Settings → Email**.
   `from` in `astro.config.mjs` must match a Bento Author.
+
+### Verifying cache
+
+```bash
+# First request — miss (Worker runs)
+curl -sI https://johnathan.org/ | grep -iE 'cf-cache-status|cache-control|cloudflare-cdn-cache-control|cache-tag'
+
+# Second request — hit (Worker skipped)
+curl -sI https://johnathan.org/ | grep -i cf-cache-status
+```
+
+After publishing a post in `/_emdash/admin`, the next request for that URL
+(and list pages tagged `posts`) should miss once, then hit again.

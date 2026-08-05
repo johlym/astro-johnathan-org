@@ -3,6 +3,8 @@
  * Same-origin so the frontend can fetch without a separate CMS host.
  */
 
+import type { APIRoute } from 'astro'
+
 export const prerender = false
 
 const BASE = 'https://api.raindrop.io/rest/v1'
@@ -14,7 +16,6 @@ type Section = { _id: number; title: string; links: Raindrop[] }
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
 }
 
 async function resolveToken(): Promise<string | undefined> {
@@ -73,11 +74,14 @@ export async function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS })
 }
 
-export async function GET() {
+export const GET: APIRoute = async ({ cache }) => {
+  // Edge caching for this route is declared in experimental.routeRules.
+  // Keep errors out of the shared cache.
   const token = await resolveToken()
 
   if (!token) {
     console.error('[/api/raindrop] RAINDROP_API_TEST_TOKEN is not set')
+    if (cache.enabled) cache.set(false)
     return Response.json([], { status: 500, headers: CORS_HEADERS })
   }
 
@@ -86,6 +90,7 @@ export async function GET() {
     return Response.json(sections, { headers: CORS_HEADERS })
   } catch (err) {
     console.error('[/api/raindrop]', err)
+    if (cache.enabled) cache.set(false)
     return Response.json([], { status: 500, headers: CORS_HEADERS })
   }
 }

@@ -4,6 +4,10 @@ import { getPosts, getPages } from '../lib/content'
 export const prerender = false
 
 export async function GET(context: APIContext) {
+  if (context.cache?.enabled) {
+    context.cache.set({ tags: ['posts', 'pages'] })
+  }
+
   const site = context.site?.origin ?? 'https://johnathan.org'
 
   const [posts, pages] = await Promise.all([

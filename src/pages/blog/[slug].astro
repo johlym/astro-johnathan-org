@@ -15,6 +15,7 @@ import {
   type EmDashPost,
 } from '../../lib/content'
 import { formatPostDate, readingMinutes } from '../../lib/format'
+import { tagContentEntry } from '../../lib/route-cache'
 import type { TaxonomyTerm } from 'emdash'
 
 const slug = Astro.params.slug
@@ -61,6 +62,10 @@ if (!post) {
   } catch (err) {
     console.error('[blog/category] getPaginatedPostsByCategory failed:', err)
   }
+}
+
+if (post) {
+  tagContentEntry(Astro.cache, 'posts', post.id)
 }
 
 const title = post?.title ?? ''
