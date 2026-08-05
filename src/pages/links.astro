@@ -5,6 +5,7 @@ import Layout from '../layouts/Layout.astro'
 import RichText from '../components/RichText.astro'
 import { getPage } from '../lib/content'
 import RaindropIoLinks from '../components/RaindropIoLinks.astro'
+import { tagContentEntry } from '../lib/route-cache'
 
 const page = await getPage('links').catch(() => null)
 
@@ -15,6 +16,7 @@ if (!page) {
   )
 }
 
+tagContentEntry(Astro.cache, 'pages', page.id)
 const edit = page.edit
 ---
 

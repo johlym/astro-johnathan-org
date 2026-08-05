@@ -16,6 +16,13 @@
   "observability": {
     "enabled": true
   },
+  // Full-page edge cache in front of the Worker. Cacheable responses
+  // (Cloudflare-CDN-Cache-Control + Cache-Tag from Astro route caching) are
+  // served as HITs without invoking the Worker. EmDash content writes call
+  // cache.invalidate → cache.purge({ tags }) to selectively evict pages.
+  "cache": {
+    "enabled": true
+  },
   "d1_databases": [
     {
       "binding": "DB",

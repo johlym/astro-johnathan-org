@@ -4,6 +4,11 @@ import { getPosts } from '../lib/content'
 export const prerender = false
 
 export async function GET(context) {
+  // Collection tag comes from experimental.routeRules; EmDash publish purges `posts`.
+  if (context.cache?.enabled) {
+    context.cache.set({ tags: ['posts'] })
+  }
+
   const posts = await getPosts(1000).catch(() => [])
 
   const items = posts.map((post) => ({

@@ -3,6 +3,7 @@ import '../styles/globals.css'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import { getSiteSettings, getPrimaryNav, getSocialsNav } from '../lib/content'
+import { applyCacheHints } from '../lib/route-cache'
 
 interface Props {
   title?: string
@@ -39,7 +40,10 @@ try {
 const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle
 const pageDescription = description || siteDescription
 
-Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+// Site chrome (settings/menus). Edge HTML caching + tags come from
+// experimental.routeRules and per-page tagContentEntry() calls; EmDash
+// preview/edit middleware opts the response out when needed.
+applyCacheHints(Astro.cache, { tags: ['site'] })
 ---
 
 <html lang="en" class="scheme-only-dark antialiased">
