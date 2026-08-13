@@ -12,7 +12,7 @@ if (!slug) {
 }
 
 // Reserved routes handled by dedicated pages
-if (['blog', 'links', 'api', '_emdash', 'search'].includes(slug)) {
+if (['blog', 'links', 'api', '_emdash', 'search', 'projects'].includes(slug)) {
   return new Response(null, { status: 404, statusText: 'Not Found' })
 }
 

@@ -75,6 +75,16 @@ export default defineConfig({
         swr: PAGE_SWR,
         tags: ['posts', 'site'],
       },
+      '/projects': {
+        maxAge: PAGE_MAX_AGE,
+        swr: PAGE_SWR,
+        tags: ['projects', 'site'],
+      },
+      '/projects/[slug]': {
+        maxAge: PAGE_MAX_AGE,
+        swr: PAGE_SWR,
+        tags: ['projects', 'site'],
+      },
       '/[slug]': {
         maxAge: PAGE_MAX_AGE,
         swr: PAGE_SWR,
@@ -90,7 +100,7 @@ export default defineConfig({
       '/search': {
         maxAge: 60,
         swr: 300,
-        tags: ['posts', 'pages'],
+        tags: ['posts', 'pages', 'projects'],
       },
       '/rss.xml': {
         maxAge: 600,
@@ -100,7 +110,7 @@ export default defineConfig({
       '/sitemap.xml': {
         maxAge: 600,
         swr: PAGE_SWR,
-        tags: ['posts', 'pages'],
+        tags: ['posts', 'pages', 'projects'],
       },
       '/api/raindrop': {
         maxAge: 300,

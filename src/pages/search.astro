@@ -20,11 +20,12 @@ if (q) {
 function hrefFor(item: (typeof results)[number]) {
   if (!item.slug) return '#'
   if (item.collection === 'posts') return `/blog/${item.slug}`
+  if (item.collection === 'projects') return `/projects/${item.slug}`
   return `/${item.slug}`
 }
 ---
 
-<Layout title={q ? `Search: ${q}` : 'Search'} description="Search posts and pages">
+<Layout title={q ? `Search: ${q}` : 'Search'} description="Search posts, pages, and projects">
   <section class="w-full bg-zinc-950 py-16 md:py-24 px-6 md:px-12 border-b border-zinc-900">
     <div class="max-w-7xl mx-auto flex flex-col gap-8">
       <div>
@@ -39,7 +40,7 @@ function hrefFor(item: (typeof results)[number]) {
           type="search"
           name="q"
           value={q}
-          placeholder="Search posts and pages…"
+          placeholder="Search posts, pages, and projects…"
           class="grow min-w-0 bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-lime-400/40 font-mono"
         />
         <button

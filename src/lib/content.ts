@@ -64,6 +64,26 @@ export type Certification = {
   issued?: string | null
 }
 
+export type ProjectImage = {
+  id?: string
+  url: string
+  alt?: string
+}
+
+export type EmDashProject = {
+  id: string
+  slug: string
+  title: string
+  images: ProjectImage[]
+  created: string
+  active: boolean
+  url?: string
+  stack: string[]
+  description: unknown
+  edit?: EditProxy
+  isPreview?: boolean
+}
+
 export type PaginatedPosts = {
   posts: EmDashPost[]
   page: number
@@ -360,13 +380,101 @@ export async function getSidebarWidgets(): Promise<Widget[]> {
 export async function searchSite(query: string, limit = 20) {
   try {
     return await emdashSearch(query, {
-      collections: ['posts', 'pages'],
+      collections: ['posts', 'pages', 'projects'],
       status: 'published',
       limit,
     })
   } catch {
     return { items: [] }
   }
+}
+
+function imageUrl(value: Record<string, unknown> | null | undefined): string | undefined {
+  if (!value) return undefined
+  const url = value.url ?? value.src
+  return typeof url === 'string' && url ? url : undefined
+}
+
+function mapProjectImage(value: unknown): ProjectImage | null {
+  if (!value || typeof value !== 'object') return null
+  const obj = value as Record<string, unknown>
+  const nested = obj.image
+  const media =
+    nested && typeof nested === 'object' ? (nested as Record<string, unknown>) : obj
+  const url = imageUrl(media)
+  if (!url) return null
+  return {
+    id: typeof media.id === 'string' ? media.id : undefined,
+    url,
+    alt: typeof media.alt === 'string' ? media.alt : undefined,
+  }
+}
+
+function mapProjectImages(value: unknown): ProjectImage[] {
+  if (!Array.isArray(value)) {
+    const single = mapProjectImage(value)
+    return single ? [single] : []
+  }
+  return value.map(mapProjectImage).filter((img): img is ProjectImage => img !== null)
+}
+
+function parseStack(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean)
+  }
+  if (typeof value !== 'string' || !value.trim()) return []
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function mapProjectEntry(
+  entry: { id: string; data: Record<string, unknown>; edit?: EditProxy; slug?: string },
+  opts?: { isPreview?: boolean },
+): EmDashProject {
+  const data = entryData(entry)
+  const created = data.created ? String(data.created) : ''
+  const url = data.url ? String(data.url) : undefined
+  return {
+    id: entryDbId(entry),
+    slug: entrySlug(entry),
+    title: String(data.title ?? ''),
+    images: mapProjectImages(data.images),
+    created,
+    active: data.active === undefined || data.active === null ? true : Boolean(data.active),
+    url: url || undefined,
+    stack: parseStack(data.stack),
+    description: data.description,
+    edit: entry.edit,
+    isPreview: opts?.isPreview,
+  }
+}
+
+function sortProjects(projects: EmDashProject[]) {
+  projects.sort((a, b) => {
+    if (a.active !== b.active) return a.active ? -1 : 1
+    const da = new Date(a.created || 0).getTime()
+    const db = new Date(b.created || 0).getTime()
+    return db - da
+  })
+  return projects
+}
+
+export async function getProjects() {
+  const { entries, error } = await getEmDashCollection('projects', {
+    status: 'published',
+    limit: 1000,
+  })
+  if (error) throw error
+
+  return sortProjects(entries.map((entry) => mapProjectEntry(entry)))
+}
+
+export async function getProject(slug: string) {
+  const { entry, error, isPreview } = await getEmDashEntry('projects', slug)
+  if (error || !entry) return null
+  return mapProjectEntry(entry, { isPreview })
 }
 
 export async function getWorkExperience(ids?: string[]) {
