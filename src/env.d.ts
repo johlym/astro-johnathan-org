@@ -1,5 +1,6 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
+/// <reference path="../node_modules/emdash/locals.d.ts" />
 
 interface ImportMetaEnv {
   readonly RAINDROP_API_TEST_TOKEN?: string
