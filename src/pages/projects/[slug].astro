@@ -5,7 +5,6 @@ import Layout from '../../layouts/Layout.astro'
 import RichText from '../../components/RichText.astro'
 import ProjectGallery from '../../components/projects/ProjectGallery.astro'
 import { getProject } from '../../lib/content'
-import { formatPostDate } from '../../lib/format'
 import { tagContentEntry } from '../../lib/route-cache'
 
 const slug = Astro.params.slug
@@ -20,9 +19,6 @@ if (!project) {
 
 tagContentEntry(Astro.cache, 'projects', project.id)
 
-const createdDate = project.created ? new Date(project.created) : null
-const created =
-  createdDate && !Number.isNaN(createdDate.getTime()) ? createdDate : null
 const edit = project.edit
 
 function displayHost(url: string) {
@@ -60,39 +56,23 @@ function displayHost(url: string) {
           <span>Back to all projects</span>
         </a>
 
-        <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-500 mb-6">
-          {created && (
-            <time datetime={created.toISOString()}>
-              {formatPostDate(created)}
-            </time>
-          )}
-          <span class="w-1 h-1 rounded-full bg-zinc-700" aria-hidden="true"></span>
-          <span
-            class:list={[
-              'uppercase tracking-wider',
-              project.active ? 'text-lime-400' : 'text-zinc-500',
-            ]}
-          >
-            {project.active ? 'Active' : 'Inactive'}
-          </span>
-          {project.url && (
-            <>
-              <span class="w-1 h-1 rounded-full bg-zinc-700" aria-hidden="true"></span>
-              <a
-                href={project.url}
-                class="text-lime-400 hover:text-lime-300 no-underline"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {displayHost(project.url)}
-              </a>
-            </>
-          )}
-        </div>
+        {project.url && (
+          <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-500 mb-6">
+            <a
+              href={project.url}
+              class="text-lime-400 hover:text-lime-300 no-underline"
+              rel="noopener noreferrer"
+              target="_blank"
+              {...edit?.project_url}
+            >
+              {displayHost(project.url)}
+            </a>
+          </div>
+        )}
 
         <h1
           class="font-heading text-3xl md:text-5xl font-bold text-white leading-tight mb-6 text-pretty"
-          {...edit?.title}
+          {...edit?.project_name}
         >
           {project.title}
         </h1>
@@ -108,9 +88,9 @@ function displayHost(url: string) {
         )}
       </header>
 
-      {project.images.length > 0 && (
-        <div class="mb-12" {...edit?.images}>
-          <ProjectGallery images={project.images} title={project.title} />
+      {project.screenshot && (
+        <div class="mb-12" {...edit?.screenshot}>
+          <ProjectGallery image={project.screenshot} title={project.title} />
         </div>
       )}
 

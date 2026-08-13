@@ -42,7 +42,13 @@ export async function GET(context: APIContext) {
   for (const project of projects) {
     urls.push({
       loc: `${site}/projects/${project.slug}/`,
-      lastmod: project.created ? new Date(project.created).toISOString() : undefined,
+      lastmod: project.publishedAt
+        ? new Date(project.publishedAt).toISOString()
+        : project.updatedAt
+          ? new Date(project.updatedAt).toISOString()
+          : project.createdAt
+            ? new Date(project.createdAt).toISOString()
+            : undefined,
     })
   }
 

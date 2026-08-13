@@ -8,11 +8,8 @@ interface Props {
 
 const { project } = Astro.props
 const href = `/projects/${project.slug}`
-const cover = project.images[0]
+const cover = project.screenshot
 const coverSrc = cover ? thumbImage(cover.url) : ''
-const createdDate = project.created ? new Date(project.created) : null
-const created = createdDate && !Number.isNaN(createdDate.getTime()) ? createdDate : null
-const year = created ? created.getFullYear() : null
 ---
 
 <a
@@ -35,18 +32,6 @@ const year = created ? created.getFullYear() : null
   </div>
 
   <div class="flex flex-col grow p-6">
-    <div class="flex items-center gap-3 text-xs font-mono text-zinc-500 mb-3">
-      {year && created && <time datetime={created.toISOString()}>{year}</time>}
-      <span
-        class:list={[
-          'uppercase tracking-wider text-[10px] px-2 py-0.5',
-          project.active ? 'bg-lime-400/10 text-lime-400' : 'bg-zinc-800 text-zinc-500',
-        ]}
-      >
-        {project.active ? 'Active' : 'Inactive'}
-      </span>
-    </div>
-
     <h2 class="font-heading font-bold text-lg text-white group-hover:text-lime-400 transition-colors leading-snug text-pretty mb-4">
       {project.title}
     </h2>
