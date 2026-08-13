@@ -74,12 +74,13 @@ export type EmDashProject = {
   id: string
   slug: string
   title: string
-  images: ProjectImage[]
-  created: string
-  active: boolean
+  screenshot: ProjectImage | null
   url?: string
   stack: string[]
   description: unknown
+  publishedAt?: string | null
+  createdAt?: string
+  updatedAt?: string
   edit?: EditProxy
   isPreview?: boolean
 }
@@ -410,14 +411,6 @@ function mapProjectImage(value: unknown): ProjectImage | null {
   }
 }
 
-function mapProjectImages(value: unknown): ProjectImage[] {
-  if (!Array.isArray(value)) {
-    const single = mapProjectImage(value)
-    return single ? [single] : []
-  }
-  return value.map(mapProjectImage).filter((img): img is ProjectImage => img !== null)
-}
-
 function parseStack(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => String(item).trim()).filter(Boolean)
@@ -434,18 +427,18 @@ function mapProjectEntry(
   opts?: { isPreview?: boolean },
 ): EmDashProject {
   const data = entryData(entry)
-  const created = data.created ? String(data.created) : ''
-  const url = data.url ? String(data.url) : undefined
+  const url = data.project_url ? String(data.project_url) : undefined
   return {
     id: entryDbId(entry),
     slug: entrySlug(entry),
-    title: String(data.title ?? ''),
-    images: mapProjectImages(data.images),
-    created,
-    active: data.active === undefined || data.active === null ? true : Boolean(data.active),
+    title: String(data.project_name ?? ''),
+    screenshot: mapProjectImage(data.screenshot),
     url: url || undefined,
     stack: parseStack(data.stack),
     description: data.description,
+    publishedAt: (data.publishedAt as string | null | undefined) ?? null,
+    createdAt: data.createdAt as string | undefined,
+    updatedAt: data.updatedAt as string | undefined,
     edit: entry.edit,
     isPreview: opts?.isPreview,
   }
@@ -453,10 +446,10 @@ function mapProjectEntry(
 
 function sortProjects(projects: EmDashProject[]) {
   projects.sort((a, b) => {
-    if (a.active !== b.active) return a.active ? -1 : 1
-    const da = new Date(a.created || 0).getTime()
-    const db = new Date(b.created || 0).getTime()
-    return db - da
+    const da = new Date(a.publishedAt ?? a.createdAt ?? 0).getTime()
+    const db = new Date(b.publishedAt ?? b.createdAt ?? 0).getTime()
+    if (db !== da) return db - da
+    return a.title.localeCompare(b.title)
   })
   return projects
 }

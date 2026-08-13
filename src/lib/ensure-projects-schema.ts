@@ -26,21 +26,16 @@ const PROJECTS_COLLECTION = {
 }
 
 const PROJECTS_FIELDS: CreateFieldInput[] = [
-  { slug: 'title', label: 'Project Name', type: 'string', required: true },
-  {
-    slug: 'images',
-    label: 'Images',
-    type: 'repeater',
-    validation: {
-      subFields: [{ slug: 'image', type: 'image', label: 'Screenshot', required: true }],
-      maxItems: 12,
-    },
-  },
-  { slug: 'created', label: 'Created date', type: 'datetime', required: true },
-  { slug: 'active', label: 'Active', type: 'boolean', defaultValue: true },
-  { slug: 'url', label: 'URL', type: 'url' },
+  { slug: 'project_name', label: 'Project Name', type: 'string', required: true },
+  { slug: 'project_url', label: 'Project URL', type: 'string' },
   { slug: 'stack', label: 'Stack', type: 'string' },
-  { slug: 'description', label: 'Description', type: 'portableText', required: true },
+  {
+    slug: 'screenshot',
+    label: 'Screenshot',
+    type: 'image',
+    validation: { allowedMimeTypes: ['image/'] },
+  },
+  { slug: 'description', label: 'Description', type: 'portableText' },
 ]
 
 let ensured = false
