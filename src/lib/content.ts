@@ -79,6 +79,7 @@ export type EmDashProject = {
   stack: string[]
   description: unknown
   excerpt?: string
+  hasDescription?: boolean
   publishedAt?: string | null
   createdAt?: string
   updatedAt?: string
@@ -537,6 +538,7 @@ function mapProjectEntry(
     stack: parseStack(data.stack),
     description: data.description,
     excerpt: portableTextExcerpt(data.description) ?? stringField(seo?.description),
+    hasDescription: Boolean(portableTextExcerpt(data.description, 10_000)),
     publishedAt: (data.publishedAt as string | Date | null | undefined)
       ? String(data.publishedAt)
       : null,
