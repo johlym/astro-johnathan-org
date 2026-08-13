@@ -1,5 +1,5 @@
 ---
-import { thumbImage } from '../../lib/image'
+import { projectThumbImage } from '../../lib/image'
 import { toPublicMediaUrl, type EmDashProject } from '../../lib/content'
 
 interface Props {
@@ -12,7 +12,7 @@ const cover = project.screenshot
 const coverUrl = cover
   ? toPublicMediaUrl(cover.url, Astro.locals.emdash?.getPublicMediaUrl)
   : ''
-const coverSrc = coverUrl ? thumbImage(coverUrl) : ''
+const coverSrc = coverUrl ? projectThumbImage(coverUrl) : ''
 ---
 
 <a
@@ -24,6 +24,9 @@ const coverSrc = coverUrl ? thumbImage(coverUrl) : ''
       <img
         src={coverSrc}
         alt={cover?.alt || project.title}
+        width="400"
+        height="250"
+        sizes="400px"
         class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-300"
         loading="lazy"
       />

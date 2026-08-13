@@ -83,3 +83,13 @@ export function heroImage(src: string | undefined | null): string {
 export function thumbImage(src: string | undefined | null): string {
   return cfImage(src, { width: 800, quality: 78, format: 'auto', fit: 'cover' })
 }
+
+/** /projects card thumbnail: shown at 400px, transformed at 800px for 2x. */
+export function projectThumbImage(src: string | undefined | null): string {
+  return cfImage(src, { width: 800, quality: 78, format: 'auto', fit: 'cover' })
+}
+
+/** /projects/[slug] screenshot: shown at 768px, transformed at 1536px for 2x. */
+export function projectDetailImage(src: string | undefined | null): string {
+  return cfImage(src, { width: 1536, quality: 82, format: 'auto', fit: 'cover' })
+}
