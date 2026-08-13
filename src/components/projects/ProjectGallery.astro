@@ -1,5 +1,5 @@
 ---
-import { heroImage } from '../../lib/image'
+import { projectDetailImage } from '../../lib/image'
 import { toPublicMediaUrl, type ProjectImage } from '../../lib/content'
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 const { image, title } = Astro.props
 const publicUrl = toPublicMediaUrl(image.url, Astro.locals.emdash?.getPublicMediaUrl)
-const optimized = heroImage(publicUrl)
+const optimized = projectDetailImage(publicUrl)
 ---
 
 {optimized && (
@@ -17,7 +17,10 @@ const optimized = heroImage(publicUrl)
     <img
       src={optimized}
       alt={image.alt || title}
-      class="w-full object-cover grayscale hover:grayscale-0 outline-1 -outline-offset-1 outline-white/10 transition-[filter] duration-300"
+      width="768"
+      height="480"
+      sizes="768px"
+      class="w-full object-cover grayscale outline-1 -outline-offset-1 outline-white/10"
       loading="eager"
     />
   </div>

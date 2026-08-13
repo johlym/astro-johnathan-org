@@ -95,11 +95,9 @@ function displayHost(url: string) {
         </div>
       )}
 
-      {project.hasDescription && (
-        <div class="min-w-0" {...edit?.description}>
-          <RichText content={project.description} class="rich-text" />
-        </div>
-      )}
+      <div class="min-w-0" {...edit?.description}>
+        <RichText content={project.description} class="rich-text" />
+      </div>
     </div>
   </article>
 </Layout>

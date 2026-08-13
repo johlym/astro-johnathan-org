@@ -79,7 +79,6 @@ export type EmDashProject = {
   stack: string[]
   description: unknown
   excerpt?: string
-  hasDescription?: boolean
   publishedAt?: string | null
   createdAt?: string
   updatedAt?: string
@@ -501,7 +500,7 @@ function portableTextExcerpt(value: unknown, max = 180): string | undefined {
 
   walk(value)
   const plain = chunks.join(' ').replace(/\s+/g, ' ').trim()
-  if (!plain || /^tbd\.?$/i.test(plain)) return undefined
+  if (!plain) return undefined
   if (plain.length <= max) return plain
   return `${plain.slice(0, max).replace(/\s+\S*$/, '')}…`
 }
@@ -538,7 +537,6 @@ function mapProjectEntry(
     stack: parseStack(data.stack),
     description: data.description,
     excerpt: portableTextExcerpt(data.description) ?? stringField(seo?.description),
-    hasDescription: Boolean(portableTextExcerpt(data.description, 10_000)),
     publishedAt: (data.publishedAt as string | Date | null | undefined)
       ? String(data.publishedAt)
       : null,
