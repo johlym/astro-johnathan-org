@@ -30,7 +30,7 @@ function displayHost(url: string) {
 }
 ---
 
-<Layout title={project.title} description={`${project.title} — a project by Johnathan Lyman`}>
+<Layout title={project.title} description={project.excerpt || `${project.title} — a project by Johnathan Lyman`}>
   {project.isPreview && (
     <div class="w-full bg-lime-400 text-zinc-950 text-center text-xs font-mono uppercase tracking-wide py-2">
       Viewing preview. This content is not published.
@@ -56,35 +56,36 @@ function displayHost(url: string) {
           <span>Back to all projects</span>
         </a>
 
-        {project.url && (
-          <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-500 mb-6">
-            <a
-              href={project.url}
-              class="text-lime-400 hover:text-lime-300 no-underline"
-              rel="noopener noreferrer"
-              target="_blank"
-              {...edit?.project_url}
-            >
-              {displayHost(project.url)}
-            </a>
-          </div>
-        )}
-
         <h1
           class="font-heading text-3xl md:text-5xl font-bold text-white leading-tight mb-6 text-pretty"
           {...edit?.project_name}
         >
-          {project.title}
+          {project.title || 'Untitled project'}
         </h1>
 
         {project.stack.length > 0 && (
-          <div class="flex flex-wrap gap-1.5" {...edit?.stack}>
+          <div class="flex flex-wrap gap-1.5 mb-6" {...edit?.stack}>
             {project.stack.map((item) => (
               <span class="text-[10px] font-mono text-lime-400/70 px-2 py-1 bg-lime-400/10">
                 {item}
               </span>
             ))}
           </div>
+        )}
+
+        {project.url && (
+          <a
+            href={project.url}
+            class="inline-flex items-center gap-2 text-sm font-mono text-lime-400 hover:text-lime-300 no-underline"
+            rel="noopener noreferrer"
+            target="_blank"
+            {...edit?.project_url}
+          >
+            <span>Visit {displayHost(project.url)}</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
         )}
       </header>
 

@@ -78,6 +78,7 @@ export type EmDashProject = {
   url?: string
   stack: string[]
   description: unknown
+  excerpt?: string
   publishedAt?: string | null
   createdAt?: string
   updatedAt?: string
@@ -390,25 +391,118 @@ export async function searchSite(query: string, limit = 20) {
   }
 }
 
-function imageUrl(value: Record<string, unknown> | null | undefined): string | undefined {
-  if (!value) return undefined
-  const url = value.url ?? value.src
-  return typeof url === 'string' && url ? url : undefined
+const INTERNAL_MEDIA_PREFIX = '/_emdash/api/media/file/'
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null
+}
+
+function stringField(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value
+  }
+  return undefined
+}
+
+/**
+ * EmDash image fields are MediaValue objects: `{ id, provider, meta.storageKey }`
+ * and often have no `url`/`src` until render time. Resolve a fetchable path.
+ */
+export function resolveMediaUrl(value: unknown): string | undefined {
+  if (value == null) return undefined
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed) return undefined
+    if (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('/') ||
+      trimmed.startsWith('data:')
+    ) {
+      return trimmed
+    }
+    return `${INTERNAL_MEDIA_PREFIX}${trimmed}`
+  }
+
+  const obj = asRecord(value)
+  if (!obj) return undefined
+
+  const meta = asRecord(obj.meta)
+  const asset = asRecord(obj.asset)
+  const nestedImage = asRecord(obj.image)
+  const layers = [obj, nestedImage, asset, meta].filter(Boolean) as Record<string, unknown>[]
+
+  for (const layer of layers) {
+    const direct = stringField(layer.src, layer.url, layer.previewUrl)
+    if (direct) return direct
+    const storageKey = stringField(layer.storageKey)
+    if (storageKey) {
+      if (storageKey.startsWith('/') || storageKey.startsWith('http')) return storageKey
+      return `${INTERNAL_MEDIA_PREFIX}${storageKey}`
+    }
+  }
+
+  const id = stringField(obj.id, asset?._ref, nestedImage?.id)
+  if (id) {
+    if (id.startsWith('/') || id.startsWith('http')) return id
+    return `${INTERNAL_MEDIA_PREFIX}${id}`
+  }
+
+  return undefined
+}
+
+/** Rewrite an internal EmDash media path through the public R2/CDN resolver. */
+export function toPublicMediaUrl(
+  url: string | undefined,
+  resolve?: ((storageKey: string) => string) | undefined,
+): string {
+  if (!url) return ''
+  if (!resolve || !url.startsWith(INTERNAL_MEDIA_PREFIX)) return url
+  const key = url.slice(INTERNAL_MEDIA_PREFIX.length)
+  return resolve(key) || url
 }
 
 function mapProjectImage(value: unknown): ProjectImage | null {
-  if (!value || typeof value !== 'object') return null
-  const obj = value as Record<string, unknown>
-  const nested = obj.image
-  const media =
-    nested && typeof nested === 'object' ? (nested as Record<string, unknown>) : obj
-  const url = imageUrl(media)
+  if (value == null || value === '') return null
+  const url = resolveMediaUrl(value)
   if (!url) return null
+  const obj = asRecord(value)
+  const media = asRecord(obj?.image) ?? asRecord(obj?.asset) ?? obj
   return {
-    id: typeof media.id === 'string' ? media.id : undefined,
+    id: stringField(media?.id, asRecord(media?.asset)?._ref),
     url,
-    alt: typeof media.alt === 'string' ? media.alt : undefined,
+    alt: stringField(media?.alt, obj?.alt),
   }
+}
+
+function portableTextExcerpt(value: unknown, max = 180): string | undefined {
+  const chunks: string[] = []
+
+  const walk = (node: unknown) => {
+    if (!node) return
+    if (typeof node === 'string') {
+      chunks.push(node)
+      return
+    }
+    if (Array.isArray(node)) {
+      for (const child of node) walk(child)
+      return
+    }
+    const rec = asRecord(node)
+    if (!rec) return
+    if (typeof rec.text === 'string') chunks.push(rec.text)
+    if (rec.children) walk(rec.children)
+    if (rec.content) walk(rec.content)
+  }
+
+  walk(value)
+  const plain = chunks.join(' ').replace(/\s+/g, ' ').trim()
+  if (!plain || /^tbd\.?$/i.test(plain)) return undefined
+  if (plain.length <= max) return plain
+  return `${plain.slice(0, max).replace(/\s+\S*$/, '')}…`
 }
 
 function parseStack(value: unknown): string[] {
@@ -428,17 +522,26 @@ function mapProjectEntry(
 ): EmDashProject {
   const data = entryData(entry)
   const url = data.project_url ? String(data.project_url) : undefined
+  const seo = asRecord(data.seo)
+  const screenshot =
+    mapProjectImage(data.screenshot) ??
+    mapProjectImage(seo?.image) ??
+    mapProjectImage(data.featured_image)
+  const title = String(data.project_name ?? data.title ?? '')
   return {
     id: entryDbId(entry),
     slug: entrySlug(entry),
-    title: String(data.project_name ?? ''),
-    screenshot: mapProjectImage(data.screenshot),
+    title,
+    screenshot,
     url: url || undefined,
     stack: parseStack(data.stack),
     description: data.description,
-    publishedAt: (data.publishedAt as string | null | undefined) ?? null,
-    createdAt: data.createdAt as string | undefined,
-    updatedAt: data.updatedAt as string | undefined,
+    excerpt: portableTextExcerpt(data.description) ?? stringField(seo?.description),
+    publishedAt: (data.publishedAt as string | Date | null | undefined)
+      ? String(data.publishedAt)
+      : null,
+    createdAt: data.createdAt ? String(data.createdAt) : undefined,
+    updatedAt: data.updatedAt ? String(data.updatedAt) : undefined,
     edit: entry.edit,
     isPreview: opts?.isPreview,
   }

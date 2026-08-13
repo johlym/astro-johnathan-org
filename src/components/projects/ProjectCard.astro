@@ -1,6 +1,6 @@
 ---
 import { thumbImage } from '../../lib/image'
-import type { EmDashProject } from '../../lib/content'
+import { toPublicMediaUrl, type EmDashProject } from '../../lib/content'
 
 interface Props {
   project: EmDashProject
@@ -9,32 +9,37 @@ interface Props {
 const { project } = Astro.props
 const href = `/projects/${project.slug}`
 const cover = project.screenshot
-const coverSrc = cover ? thumbImage(cover.url) : ''
+const coverUrl = cover
+  ? toPublicMediaUrl(cover.url, Astro.locals.emdash?.getPublicMediaUrl)
+  : ''
+const coverSrc = coverUrl ? thumbImage(coverUrl) : ''
 ---
 
 <a
   href={href}
   class="group flex flex-col bg-zinc-900/20 border border-zinc-900 hover:border-lime-400/30 transition-all duration-300 no-underline h-full overflow-hidden"
 >
-  <div class="aspect-[16/10] bg-zinc-900 overflow-hidden">
-    {coverSrc ? (
+  {coverSrc ? (
+    <div class="aspect-[16/10] bg-zinc-900 overflow-hidden">
       <img
         src={coverSrc}
         alt={cover?.alt || project.title}
         class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-300"
         loading="lazy"
       />
-    ) : (
-      <div class="w-full h-full flex items-center justify-center">
-        <span class="font-mono text-[10px] uppercase tracking-widest text-zinc-700">No image</span>
-      </div>
-    )}
-  </div>
+    </div>
+  ) : null}
 
   <div class="flex flex-col grow p-6">
-    <h2 class="font-heading font-bold text-lg text-white group-hover:text-lime-400 transition-colors leading-snug text-pretty mb-4">
-      {project.title}
+    <h2 class="font-heading font-bold text-lg text-white group-hover:text-lime-400 transition-colors leading-snug text-pretty mb-3">
+      {project.title || 'Untitled project'}
     </h2>
+
+    {project.excerpt && (
+      <p class="text-sm text-zinc-400 leading-relaxed mb-4">
+        {project.excerpt}
+      </p>
+    )}
 
     {project.stack.length > 0 && (
       <div class="mt-auto flex flex-wrap gap-1.5">

@@ -64,9 +64,10 @@ export function cfImage(src: string | undefined | null, opts: ImageOptions = {})
   const options = serializeOptions(opts)
 
   // Cloudflare accepts either an absolute upstream URL or a same-zone
-  // relative path. Media URLs from Payload are absolute (R2 public
-  // bucket), so we forward them verbatim.
-  return `${IMAGE_HOST}/cdn-cgi/image/${options}/${src}`
+  // relative path. A leading slash on a relative path would produce
+  // `/cdn-cgi/image/<opts>//path`, so strip it.
+  const source = src.startsWith('/') ? src.slice(1) : src
+  return `${IMAGE_HOST}/cdn-cgi/image/${options}/${source}`
 }
 
 /**
