@@ -1,24 +1,26 @@
 import type { APIContext } from 'astro'
-import { getPosts, getPages } from '../lib/content'
+import { getPosts, getPages, getProjects } from '../lib/content'
 
 export const prerender = false
 
 export async function GET(context: APIContext) {
   if (context.cache?.enabled) {
-    context.cache.set({ tags: ['posts', 'pages'] })
+    context.cache.set({ tags: ['posts', 'pages', 'projects'] })
   }
 
   const site = context.site?.origin ?? 'https://johnathan.org'
 
-  const [posts, pages] = await Promise.all([
+  const [posts, pages, projects] = await Promise.all([
     getPosts(1000).catch(() => []),
     getPages().catch(() => []),
+    getProjects().catch(() => []),
   ])
 
   const urls: { loc: string; lastmod?: string }[] = []
 
   urls.push({ loc: `${site}/` })
   urls.push({ loc: `${site}/blog/` })
+  urls.push({ loc: `${site}/projects/` })
   urls.push({ loc: `${site}/links/` })
 
   for (const post of posts) {
@@ -35,6 +37,13 @@ export async function GET(context: APIContext) {
   for (const page of pages) {
     if (['links'].includes(page.slug)) continue
     urls.push({ loc: `${site}/${page.slug}/` })
+  }
+
+  for (const project of projects) {
+    urls.push({
+      loc: `${site}/projects/${project.slug}/`,
+      lastmod: project.created ? new Date(project.created).toISOString() : undefined,
+    })
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -148,6 +148,67 @@
           "type": "datetime"
         }
       ]
+    },
+    {
+      "slug": "projects",
+      "label": "Projects",
+      "labelSingular": "Project",
+      "description": "Past work and featured projects",
+      "icon": "layout-grid",
+      "supports": ["drafts", "revisions", "preview", "search", "seo"],
+      "urlPattern": "/projects/{slug}",
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Project Name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "images",
+          "label": "Images",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "image",
+                "type": "image",
+                "label": "Screenshot",
+                "required": true
+              }
+            ],
+            "maxItems": 12
+          }
+        },
+        {
+          "slug": "created",
+          "label": "Created date",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "slug": "active",
+          "label": "Active",
+          "type": "boolean",
+          "defaultValue": true
+        },
+        {
+          "slug": "url",
+          "label": "URL",
+          "type": "url"
+        },
+        {
+          "slug": "stack",
+          "label": "Stack",
+          "type": "string"
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "portableText",
+          "required": true
+        }
+      ]
     }
   ],
   "taxonomies": [
@@ -166,6 +227,7 @@
       "items": [
         { "type": "custom", "label": "Home", "url": "/" },
         { "type": "custom", "label": "Blog", "url": "/blog" },
+        { "type": "custom", "label": "Projects", "url": "/projects" },
         { "type": "custom", "label": "Links", "url": "/links" }
       ]
     }
