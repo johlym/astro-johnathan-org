@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
-import { getEmDashCollection, getRequestContext, SchemaRegistry } from 'emdash'
+import { getEmDashCollection, SchemaRegistry } from 'emdash'
+import { getDb } from 'emdash/runtime'
 
 export const prerender = false
 
@@ -8,13 +9,7 @@ export const GET: APIRoute = async ({ url }) => {
     return new Response(null, { status: 404 })
   }
 
-  const db = getRequestContext()?.db as ConstructorParameters<typeof SchemaRegistry>[0] | undefined
-  if (!db) {
-    return new Response(JSON.stringify({ error: 'no db' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
+  const db = await getDb()
 
   const registry = new SchemaRegistry(db)
   const collections = await registry.listCollectionsWithFields()
